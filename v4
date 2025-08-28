@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Will Hewitt - Builder & Creator</title>
+    <title>Will Hewitt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -82,18 +82,16 @@
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
       }
       .project-box:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
       }
       html.light .project-box {
         background-color: #ffffff;
         border-color: #e5e7eb; /* gray-200 */
       }
 
-
       /* Animated Border Styles */
-      .experience-item,
-      .timeline-content {
+      .experience-item {
         cursor: pointer;
         position: relative;
         transition: transform 0.2s ease-out, background-color 0.3s;
@@ -103,20 +101,17 @@
         background-color: #374151; /* This is now the BORDER color */
         border: 1px solid transparent; /* Prevents layout shift */
       }
-      html.light .experience-item,
-      html.light .timeline-content {
+      html.light .experience-item {
         background-color: #e5e7eb; /* Light mode border color */
       }
       .experience-item:hover {
         transform: scale(1.03);
       }
-      .experience-item > div,
-      .timeline-content > div {
+      .experience-item > div {
         position: relative;
         z-index: 2;
       }
-      .experience-item::before,
-      .timeline-content::before {
+      .experience-item::before {
         content: "";
         position: absolute;
         top: 50%;
@@ -138,13 +133,11 @@
         transition: opacity 0.4s ease-in-out;
         animation: spin 4s linear infinite paused;
       }
-      .experience-item:hover::before,
-      .timeline-content:hover::before {
+      .experience-item:hover::before {
         opacity: 0.7;
         animation-play-state: running;
       }
-      .experience-item::after,
-      .timeline-content::after {
+      .experience-item::after {
         content: "";
         position: absolute;
         inset: 1px;
@@ -153,8 +146,7 @@
         z-index: 1;
         transition: background-color 0.3s;
       }
-      html.light .experience-item::after,
-      html.light .timeline-content::after {
+      html.light .experience-item::after {
         background-color: #ffffff;
       }
       @keyframes spin {
@@ -458,9 +450,19 @@
         width: 24px;
         height: 24px;
         transition: transform 0.3s ease-in-out;
+        display: block;
       }
       .collapsible-heading.collapsed .collapsible-toggle-icon {
         transform: rotate(45deg);
+      }
+      /* Desktop-specific hover effect */
+      @media screen and (min-width: 769px) {
+        .collapsible-toggle-icon {
+          display: none; /* Hide icon on desktop */
+        }
+        .collapsible-heading:hover {
+          transform: scale(1.01) translateY(-2px);
+        }
       }
       .collapsible-content-wrapper {
         display: grid;
@@ -475,15 +477,15 @@
       }
 
       .subheading {
-          font-weight: bold;
-          border-bottom: 2px solid #fbbf24;
-          padding-bottom: 4px;
-          display: inline-block;
-          color: #d1d5db;
+        font-weight: bold;
+        border-bottom: 2px solid #fbbf24;
+        padding-bottom: 4px;
+        display: inline-block;
+        color: #d1d5db;
       }
       html.light .subheading {
-          border-bottom-color: #3b82f6;
-          color: #374151;
+        border-bottom-color: #3b82f6;
+        color: #374151;
       }
       .content-link {
         color: #fbbf24;
@@ -657,10 +659,16 @@
         background-color: #d1d5db;
       }
       .timeline-line-progress {
-        background-color: #fbbf24;
+        background: linear-gradient(
+          180deg,
+          #fbbf24 0%,
+          #ef4444 50%,
+          #8b5cf6 100%
+        );
         width: 100%;
         height: 0;
-        transition: height 0.2s linear;
+        transition: height 0.02s linear;
+        box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
       }
       .timeline-item {
         padding: 10px 40px;
@@ -669,7 +677,8 @@
         width: 50%;
         opacity: 0;
         transform: translateX(-30px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .timeline-item.is-visible {
         opacity: 1;
@@ -682,14 +691,41 @@
         height: 20px;
         right: -10px;
         background-color: #111827;
-        border: 4px solid #fbbf24;
+        border: 4px solid #374151;
         top: var(--marker-top, 25px);
         border-radius: 50%;
         z-index: 2;
-        transition: background-color 0.3s, border-color 0.3s;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
       }
-      html.light .timeline-item::after {
-        background-color: #f3f4f6;
+      .timeline-item.is-visible::after {
+        border-color: #fbbf24;
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+      }
+      .timeline-item.is-passed::after {
+        background: linear-gradient(135deg, #fbbf24, #ef4444);
+        border-color: #fbbf24;
+      }
+      @keyframes timelinePulse {
+        0%,
+        100% {
+          transform: scale(1.2);
+          box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+        }
+        50% {
+          transform: scale(1.4);
+          box-shadow: 0 0 30px rgba(251, 191, 36, 0.8);
+        }
+      }
+      .timeline-item.is-current::after {
+        animation: timelinePulse 2s ease-in-out infinite;
+      }
+      .timeline-content {
+        transform: perspective(1000px) rotateX(0deg);
+        transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+      }
+      .timeline-content:hover {
+        transform: perspective(1000px) rotateX(2deg) translateY(-5px);
       }
       .timeline-left {
         left: 0;
@@ -738,9 +774,6 @@
       .timeline-right::after {
         left: -10px;
       }
-      .timeline-content {
-        padding: 20px 30px;
-      }
       .timeline-year {
         position: relative;
         padding: 1rem 0;
@@ -749,21 +782,23 @@
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #111827;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
         color: #f9fafb;
-        padding: 0.25rem 1rem;
+        padding: 0.35rem 1.2rem;
         border-radius: 9999px;
         font-family: "Press Start 2P", cursive;
         font-size: 0.75rem;
-        z-index: 2;
-        transition: background-color 0.3s, color 0.3s;
-      }
-      html.light .timeline-year span {
-        background-color: #f3f4f6;
-        color: #374151;
+        z-index: 3;
+        border: 2px solid #374151;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
       .timeline-year.is-passed span {
-        color: #fbbf24 !important;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        border-color: #fbbf24;
+        color: #111827 !important;
+        transform: translateX(-50%) scale(1.1);
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
       }
 
       html.light footer {
@@ -822,55 +857,54 @@
       .slider.round:before {
         border-radius: 50%;
       }
-      
+
       /* --- Tab Styles --- */
       .tabs-container {
-          margin-top: 1rem;
+        margin-top: 1rem;
       }
       .tab-buttons {
-          display: flex;
-          gap: 0.5rem;
-          border-bottom: 2px solid #374151;
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #374151;
       }
       html.light .tab-buttons {
-          border-bottom-color: #d1d5db;
+        border-bottom-color: #d1d5db;
       }
       .tab-btn {
-          padding: 0.5rem 1rem;
-          cursor: pointer;
-          background-color: transparent;
-          border: none;
-          color: #6b7280;
-          font-family: "Space Mono", monospace;
-          border-bottom: 3px solid transparent;
-          transform: translateY(2px);
-          transition: color 0.2s, border-color 0.2s;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        color: #6b7280;
+        font-family: "Space Mono", monospace;
+        border-bottom: 3px solid transparent;
+        transform: translateY(2px);
+        transition: color 0.2s, border-color 0.2s;
       }
       html.light .tab-btn {
-          color: #6b7280;
+        color: #6b7280;
       }
       .tab-btn:hover {
-          color: #d1d5db;
+        color: #d1d5db;
       }
       html.light .tab-btn:hover {
-          color: #374151;
+        color: #374151;
       }
       .tab-btn.active {
-          color: #fbbf24;
-          border-bottom-color: #fbbf24;
+        color: #fbbf24;
+        border-bottom-color: #fbbf24;
       }
       html.light .tab-btn.active {
-          color: #3b82f6;
-          border-bottom-color: #3b82f6;
+        color: #3b82f6;
+        border-bottom-color: #3b82f6;
       }
       .tab-content {
-          display: none;
-          padding: 1.5rem 0.5rem;
+        display: none;
+        padding: 1.5rem 0.5rem;
       }
       .tab-content.active {
-          display: block;
+        display: block;
       }
-
 
       /* --- MOBILE RESPONSIVE FIXES --- */
       @media screen and (max-width: 768px) {
@@ -915,6 +949,15 @@
         }
         .timeline-item.is-visible {
           transform: translateX(0);
+        }
+        .timeline-item.is-visible::after {
+          transform: scale(1.1);
+        }
+        .timeline-item.is-current::after {
+          animation: timelinePulse 2s ease-in-out infinite;
+        }
+        footer p {
+          text-align: center;
         }
       }
     </style>
@@ -961,7 +1004,13 @@
           id="sticky-socials"
           class="w-full flex justify-between items-center mt-2 opacity-0 transition-opacity duration-300"
         >
-          <a href="https://www.linkedin.com/in/william-js-hewitt/" target="_blank" rel="noopener noreferrer" class="social-link font-pixel text-sm">LinkedIn</a>
+          <a
+            href="https://www.linkedin.com/in/william-js-hewitt/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-link font-pixel text-sm"
+            >LinkedIn</a
+          >
           <a href="#" class="social-link font-pixel text-sm contact-btn"
             >Contact</a
           >
@@ -980,7 +1029,13 @@
             id="original-socials"
             class="mt-4 flex justify-between items-center"
           >
-            <a href="https://www.linkedin.com/in/william-js-hewitt/" target="_blank" rel="noopener noreferrer" class="social-link font-pixel text-sm">LinkedIn</a>
+            <a
+              href="https://www.linkedin.com/in/william-js-hewitt/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link font-pixel text-sm"
+              >LinkedIn</a
+            >
             <a href="#" class="social-link font-pixel text-sm contact-btn"
               >Contact</a
             >
@@ -1009,368 +1064,396 @@
               housing, planning, startups, private markets, and anything else
               derivative of or related to those things.
               <br /><br />
-              I particularly enjoy reading, learning, questioning things,
-              and research. When I can, I like to tinker with boats, sail them,
+              I particularly enjoy reading, learning, questioning things, and
+              research. When I can, I like to tinker with boats, sail them,
               climb things, watch motorsport, code projects and cross-country
               run.
             </p>
             <div class="mt-6 mb-10">
-                <div id="done-section">
-                    <div id="done-heading" class="collapsible-heading">
-                        <h3 class="subheading">things i've done recently</h3>
-                        <span class="collapsible-toggle-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        </span>
-                    </div>
-                    <div class="collapsible-content-wrapper open">
-                        <div class="collapsible-inner-content">
-                            <div class="mt-4 text-gray-300">
-                                <ul class="list-disc list-inside space-y-3 pl-2">
-                                    <li>Started writing my first substack article on housing. I hope to have this complete by September.</li>
-                                    <li>Finished Invisible College in Cambridge with a bunch of other young people. We explored topics ranging from fermi estimations, to 20th century downzoning and hearing from people like the 'invention historian' Anton Howes, and Faculty AI CEO Marc Warner. It was a tiring but enormously fulfilling and motivating experience. Read more about it <a href="https://www.linkedin.com/posts/rachel-edwards-a27a737a_last-week-works-in-progress-hosted-the-second-activity-7360974066414997504-OVAz?utm_source=share&utm_medium=member_desktop&rcm=ACoAADTuFAYBdOf2dkt0abobumy3U49FRBaYgv4" target="_blank" rel="noopener noreferrer" class="content-link">here</a>.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+              <div id="done-section">
+                <div id="done-heading" class="collapsible-heading">
+                  <h3 class="subheading">things i've done recently</h3>
+                  <span class="collapsible-toggle-icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                      stroke="currentColor"
+                      class="w-6 h-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+                  </span>
                 </div>
-                <div id="reads-section" class="mt-8">
-                    <div id="reads-heading" class="collapsible-heading collapsed">
-                        <h3 class="subheading">things i enjoy reading/watching/listening</h3>
-                        <span class="collapsible-toggle-icon">
-                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        </span>
+                <div class="collapsible-content-wrapper closed">
+                  <div class="collapsible-inner-content">
+                    <div class="mt-4 text-gray-300">
+                      <ul class="list-disc list-inside space-y-3 pl-2">
+                        <li>
+                          Started writing my first substack article on housing.
+                          I hope to have this complete by September.
+                        </li>
+                        <li>
+                          Finished Invisible College in Cambridge with a bunch
+                          of other young people. We explored topics ranging from
+                          fermi estimations, to 20th century downzoning, and
+                          heard from people like the 'invention historian' Anton
+                          Howes, and Faculty AI CEO Marc Warner. It was a tiring
+                          but enormously fulfilling and motivating experience
+                          and I urge anyone age 18 - 22 to apply. Read more
+                          about it
+                          <a
+                            href="https://www.linkedin.com/posts/rachel-edwards-a27a737a_last-week-works-in-progress-hosted-the-second-activity-7360974066414997504-OVAz?utm_source=share&utm_medium=member_desktop&rcm=ACoAADTuFAYBdOf2dkt0abobumy3U49FRBaYgv4"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="content-link"
+                            >here</a
+                          >.
+                        </li>
+                      </ul>
                     </div>
-                    <div class="collapsible-content-wrapper">
-                        <div class="collapsible-inner-content">
-                            <div class="tabs-container">
-                                <div class="tab-buttons">
-                                    <button class="tab-btn active" data-tab="books">Books</button>
-                                    <button class="tab-btn" data-tab="podcasts">Podcasts</button>
-                                    <button class="tab-btn" data-tab="tv-film">TV/Film</button>
-                                </div>
-                                <div id="books" class="tab-content active">
-                                    <ul class="list-disc list-inside space-y-2 text-gray-300">
-                                        <li>'Where Is My Flying Car?' by J. Storrs Hall</li>
-                                        <li>'The Chip War' by Chris Miller</li>
-                                        <li>'How The World Really Works' by Vaclav Smil</li>
-                                    </ul>
-                                </div>
-                                <div id="podcasts" class="tab-content">
-                                    <ul class="list-disc list-inside space-y-2 text-gray-300">
-                                        <li>The All-In Podcast</li>
-                                        <li>Huberman Lab</li>
-                                        <li>The Rest is History</li>
-                                    </ul>
-                                </div>
-                                <div id="tv-film" class="tab-content">
-                                    <ul class="list-disc list-inside space-y-2 text-gray-300">
-                                        <li>Succession</li>
-                                        <li>Dune: Part Two</li>
-                                        <li>Band of Brothers</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
           </section>
-          
+
           <section id="experience-section" class="mb-16">
             <div id="experience-heading" class="collapsible-heading collapsed">
-                <h2 class="text-2xl font-semibold text-gray-100">Experience</h2>
-                <span class="collapsible-toggle-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                </span>
+              <h2 class="text-2xl font-semibold text-gray-100">Experience</h2>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
             </div>
             <div class="collapsible-content-wrapper">
-                <div class="collapsible-inner-content">
-                    <div id="experience-container" class="flex flex-col gap-8 mt-12 p-4">
-                      <div class="flex w-full justify-start">
-                        <div
-                          class="experience-item w-full md:w-5/6 lg:w-3/4"
-                          data-title="Intern, Dean Street Advisers"
-                          data-date="Winter 2024"
-                          data-details="Intern at a boutique M&A advisory firm, specialising in Public-Private market transactions. Worked primarily on deal origination and research, utilising FactSet and other data sources to identify take-private scenarios. Through meetings with VC and PE firms including Carlyle, Bain, and Mercuri, as well as other business activities, gained an increased appreciation for withholding market-sensitive information. Supported the Managing Partner in pitching an asset disposal to a partner at Bain capital."
-                          data-skills="M&A,Deal Origination,Financial Research,FactSet"
-                        >
-                          <div class="p-4">
-                            <h3 class="font-semibold text-gray-100 text-base">
-                              Intern, Dean Street Advisers
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">Winter 2024</p>
-                            <p class="mt-3 text-gray-300">
-                              Pitched an asset disposal to a partner at Bain capital.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex w-full justify-end">
-                        <div
-                          class="experience-item w-full md:w-5/6 lg:w-3/4"
-                          data-title="Intern and Founder's Associate, Tract UK"
-                          data-date="May - October 2024"
-                          data-details="Joined immediately after the pre-seed raise at a fast-growing AI prop-tech startup, as the first ‘hire’, helping the two cofounders full-time with a variety of tasks and projects during a major growth phase. Met and liaised with investors, managed the website and product launch, and built a marketing strategy to target rural landowners. Through meetings with investors, and internal discussions, I enhanced my understanding of the dynamics of private markets, particularly early stage venture capital dynamics in the UK.<br><br>I'm really proud and grateful for my time at Tract, playing even a small role in trying to ease the UK's housing crisis is what got me so interested in the topic of housing, and startups more broadly.<br><br>Tract was shuttered in April 2025 after Jamie and Henry (Tract's Founders) realised there was not a clear path to venture-scale returns. You can read their full and widely lauded postmortem here <a href='https://buildwithtract.com/' class='text-amber-400 hover:text-amber-300' target='_blank' rel='noopener noreferrer'>Tract Postmortem</a>."
-                          data-skills="Venture Capital,Marketing Strategy,Investor Relations,Product Launch"
-                        >
-                          <div class="p-4">
-                            <h3 class="font-semibold text-gray-100 text-base">
-                              Intern and Founder's Associate, Tract UK
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">May - October 2024</p>
-                            <p class="mt-3 text-gray-300">
-                              Supported the two founders as the 'first hire' during a
-                              major growth phase.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex w-full justify-start">
-                        <div
-                          class="experience-item w-full md:w-5/6 lg:w-3/4"
-                          data-title="Internship, Kindred for Business"
-                          data-date="May - September 2023"
-                          data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics. Grew relationships with individuals across my team and the business, solving a variety of challenges and creating viable long-term solutions relating to data visualisation, particularly through the use of Microsoft Power BI."
-                          data-skills="Data Analytics,Power BI,Google Analytics,Commercialisation"
-                        >
-                          <div class="p-4">
-                            <h3 class="font-semibold text-gray-100 text-base">
-                              Internship, Kindred for Business
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">
-                              May - September 2023
-                            </p>
-                            <p class="mt-3 text-gray-300">
-                              Aided in AI and commercialisation challenges in a B2B2C
-                              app monetisation start-up.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex w-full justify-end">
-                        <div
-                          class="experience-item w-full md:w-5/6 lg:w-3/4"
-                          data-title="Work Experience, Ruffer LLP"
-                          data-date="August 2022"
-                          data-details="Awarded a place on Ruffer’s Work Experience programme, ‘Ruffer Academy’, gaining an insight into the workings of a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
-                          data-skills="Investment Analysis,Equity Research,Pitching,Collaboration"
-                        >
-                          <div class="p-4">
-                            <h3 class="font-semibold text-gray-100 text-base">
-                              Work Experience, Ruffer LLP
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">August 2022</p>
-                            <p class="mt-3 text-gray-300">
-                              Pitched a chosen stock to partners as part of a
-                              competition, with our group winning.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex w-full justify-start">
-                        <div
-                          class="experience-item w-full md:w-5/6 lg:w-3/4"
-                          data-title="Internship, Media Intelligence Partners"
-                          data-date="October 2021"
-                          data-details="Worked for a political communications and PR firm helping around the office on various tasks. Authored articles for a client’s website with 30-40k monthly traffic, in addition to formulating content on the Budget. Learnt valuable interpersonal skills and discretion surrounding the handling of privileged information. Drafted press releases for influential think tanks including the Centre for Social Justice (CSJ)."
-                          data-skills="Political Communications,PR,Content Creation,Writing"
-                        >
-                          <div class="p-4">
-                            <h3 class="font-semibold text-gray-100 text-base">
-                              Internship, Media Intelligence Partners
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">October 2021</p>
-                            <p class="mt-3 text-gray-300">
-                              Authored articles for a client’s website with 30-40k
-                              monthly traffic.
-                            </p>
-                          </div>
-                        </div>
+              <div class="collapsible-inner-content">
+                <div
+                  id="experience-container"
+                  class="flex flex-col gap-8 mt-12 p-4"
+                >
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Intern, Dean Street Advisers"
+                      data-date="Winter 2024"
+                      data-details="Intern at a boutique M&A advisory firm, specialising in Public-Private market transactions. Worked primarily on deal origination and research, utilising FactSet and other data sources to identify take-private scenarios. Through meetings with VC and PE firms including Carlyle, Bain, and Mercuri, as well as other business activities, gained an increased appreciation for withholding market-sensitive information. Supported the Managing Partner in pitching an asset disposal to a partner at Bain capital."
+                      data-skills="M&A,Deal Origination,Financial Research,FactSet"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Intern, Dean Street Advisers
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">Winter 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Pitched an asset disposal to a partner at Bain
+                          capital.
+                        </p>
                       </div>
                     </div>
+                  </div>
+                  <div class="flex w-full justify-end">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Intern and Founder's Associate, Tract UK"
+                      data-date="May - October 2024"
+                      data-details="Joined immediately after the pre-seed raise at a fast-growing AI prop-tech startup, as the first ‘hire’, helping the two cofounders full-time with a variety of tasks and projects during a major growth phase. Met and liaised with investors, managed the website and product launch, and built a marketing strategy to target rural landowners. Through meetings with investors, and internal discussions, I enhanced my understanding of the dynamics of private markets, particularly early stage venture capital dynamics in the UK.<br><br>I'm really proud and grateful for my time at Tract, playing even a small role in trying to ease the UK's housing crisis is what got me so interested in the topic of housing, and startups more broadly.<br><br>Tract was shuttered in April 2025 after Jamie and Henry (Tract's Founders) realised there was not a clear path to venture-scale returns. You can read their full and widely lauded postmortem here <a href='https://buildwithtract.com/' class='text-amber-400 hover:text-amber-300' target='_blank' rel='noopener noreferrer'>Tract Postmortem</a>."
+                      data-skills="Venture Capital,Marketing Strategy,Investor Relations,Product Launch"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Intern and Founder's Associate, Tract UK
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">
+                          May - October 2024
+                        </p>
+                        <p class="mt-3 text-gray-300">
+                          Supported the two founders as the 'first hire' during
+                          a major growth phase.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Internship, Kindred for Business"
+                      data-date="May - September 2023"
+                      data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics. Grew relationships with individuals across my team and the business, solving a variety of challenges and creating viable long-term solutions relating to data visualisation, particularly through the use of Microsoft Power BI."
+                      data-skills="Data Analytics,Power BI,Google Analytics,Commercialisation"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship, Kindred for Business
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">
+                          May - September 2023
+                        </p>
+                        <p class="mt-3 text-gray-300">
+                          Aided in AI and commercialisation challenges in a
+                          B2B2C app monetisation start-up.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-end">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Work Experience, Ruffer LLP"
+                      data-date="August 2022"
+                      data-details="Awarded a place on Ruffer’s Work Experience programme, ‘Ruffer Academy’, gaining an insight into the workings of a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
+                      data-skills="Investment Analysis,Equity Research,Pitching,Collaboration"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Work Experience, Ruffer LLP
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2022</p>
+                        <p class="mt-3 text-gray-300">
+                          Pitched a chosen stock to partners as part of a
+                          competition, with our group winning.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Internship, Media Intelligence Partners"
+                      data-date="October 2021"
+                      data-details="Worked for a political communications and PR firm helping around the office on various tasks. Authored articles for a client’s website with 30-40k monthly traffic, in addition to formulating content on the Budget. Learnt valuable interpersonal skills and discretion surrounding the handling of privileged information. Drafted press releases for influential think tanks including the Centre for Social Justice (CSJ)."
+                      data-skills="Political Communications,PR,Content Creation,Writing"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship, Media Intelligence Partners
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">October 2021</p>
+                        <p class="mt-3 text-gray-300">
+                          Authored articles for a client’s website with 30-40k
+                          monthly traffic.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
           </section>
 
           <section id="timeline-section" class="mb-16">
             <div id="timeline-heading" class="collapsible-heading collapsed">
-                <h2 class="text-2xl font-semibold text-gray-100">Timeline</h2>
-                <span class="collapsible-toggle-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                </span>
+              <h2 class="text-2xl font-semibold text-gray-100">Timeline</h2>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
             </div>
             <div class="collapsible-content-wrapper">
-                <div class="collapsible-inner-content">
-                    <div class="timeline mt-12 relative">
-                        <div class="timeline-line-container">
-                            <div id="timeline-progress" class="timeline-line-progress"></div>
-                        </div>
-                        <div class="timeline-year"><span>2025</span></div>
-                        <div class="timeline-item timeline-left" data-month="8">
-                            <div
-                            class="timeline-content"
-                            data-title="Invisible College Seminar"
-                            data-date="August 2025"
-                            data-details="Attended a week-long seminar in Cambridge run by Works in Progress, a subsidiary of Stripe covering AI, Biosciences, Robotics, and Urban Design. Had talks from Anton Howes on the origins of the Industrial Revolution, learnt about bad science from Stuart Ritchie, and presented a lightning talk judged by Marc Warner, CEO of Faculty AI"
-                            data-skills="AI,Bioscience,Robotics,Urban Design,Housing,Progress"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Invisible College Seminar
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">August 2025</p>
-                                <p class="mt-3 text-gray-300">
-                                Attended a week-long seminar in Cambridge.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item timeline-right" data-month="7">
-                            <div
-                            class="timeline-content"
-                            data-title="Graduated University"
-                            data-date="July 2025"
-                            data-details="Completed my degree in History from the University of Nottingham, receiving a 2.1 overall, and a 1st (78%) for my dissertation thesis entitled 'The 1947 Town and Country Planning Act: Origins and representations
-                            through a contemporary perspective'"
-                            data-skills="History,Research,Writing"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Graduated University
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">July 2025</p>
-                                <p class="mt-3 text-gray-300">
-                                Graduated from the University of Nottingham with a degree
-                                in History.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-year"><span>2024</span></div>
-                        <div class="timeline-item timeline-left" data-month="12">
-                            <div
-                            class="timeline-content"
-                            data-title="Internship at Dean Street Advisers"
-                            data-date="December 2024"
-                            data-details="Gained experience in M&A advisory and deal origination at a boutique advisory firm."
-                            data-skills="M&A,Deal Origination,Financial Research"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Internship at Dean Street Advisers
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">December 2024</p>
-                                <p class="mt-3 text-gray-300">
-                                Gained experience in M&A advisory and deal origination.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item timeline-right" data-month="8">
-                            <div
-                            class="timeline-content"
-                            data-title="Tract UK"
-                            data-date="May - Oct 2024"
-                            data-details="Worked in a position equivalent to Founder's Associate at a high-growth prop-tech startup, supporting the two founders as the 'first hire' during a major growth phase."
-                            data-skills="Startups,Venture Capital,Prop-Tech"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Tract UK
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">May - Oct 2024</p>
-                                <p class="mt-3 text-gray-300">
-                                Started as a Founder's Associate at a high-growth
-                                prop-tech startup.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-year"><span>2023</span></div>
-                        <div class="timeline-item timeline-left" data-month="7">
-                            <div
-                            class="timeline-content"
-                            data-title="Kindred for Business Internship"
-                            data-date="May - Sep 2023"
-                            data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics."
-                            data-skills="Data Analytics,Power BI,Commercialisation"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Kindred for Business Internship
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">May - Sep 2023</p>
-                                <p class="mt-3 text-gray-300">
-                                Aided in AI and commercialisation challenges in a B2B2C
-                                app monetisation start-up.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-year"><span>2022</span></div>
-                        <div class="timeline-item timeline-right" data-month="8">
-                            <div
-                            class="timeline-content"
-                            data-title="Ruffer LLP Work Experience"
-                            data-date="August 2022"
-                            data-details="Gained insight into a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
-                            data-skills="Investment,Financial Analysis,Pitching"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Ruffer LLP Work Experience
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">August 2022</p>
-                                <p class="mt-3 text-gray-300">
-                                Gained insight into a $36bn AUM L/S Multi-Strat investment
-                                fund.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-year"><span>2021</span></div>
-                        <div class="timeline-item timeline-left" data-month="9">
-                            <div
-                            class="timeline-content"
-                            data-title="Started University of Nottingham"
-                            data-date="Autumn 2021"
-                            data-details="Began studies in History, focusing on economic and political history."
-                            data-skills="History,Academics,University"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Started University of Nottingham
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">Autumn 2021</p>
-                                <p class="mt-3 text-gray-300">
-                                Began studies in History, focusing on economic and
-                                political history.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item timeline-right" data-month="6">
-                            <div
-                            class="timeline-content"
-                            data-title="Left School"
-                            data-date="2021"
-                            data-details="Graduated from Bradfield College with A Levels in History, Economics, Politics, and an EPQ."
-                            data-skills="A-Levels,Economics,Politics,History"
-                            >
-                            <div>
-                                <h3 class="font-semibold text-gray-100 text-base">
-                                Left School
-                                </h3>
-                                <p class="text-sm text-gray-400 mt-1">2021</p>
-                                <p class="mt-3 text-gray-300">
-                                Graduated from Bradfield College with A Levels in History,
-                                Economics, Politics, and an EPQ.
-                                </p>
-                            </div>
-                            </div>
-                        </div>
+              <div class="collapsible-inner-content">
+                <div class="timeline mt-12 relative">
+                  <div class="timeline-line-container">
+                    <div
+                      id="timeline-progress"
+                      class="timeline-line-progress"
+                    ></div>
+                  </div>
+                  <div class="timeline-year"><span>2025</span></div>
+                  <div class="timeline-item timeline-left" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Invisible College Seminar"
+                      data-date="August 2025"
+                      data-details="Attended a week-long seminar in Cambridge run by Works in Progress, a subsidiary of Stripe covering AI, Biosciences, Robotics, and Urban Design. Had talks from Anton Howes on the origins of the Industrial Revolution, learnt about bad science from Stuart Ritchie, and presented a lightning talk judged by Marc Warner, CEO of Faculty AI"
+                      data-skills="AI,Bioscience,Robotics,Urban Design,Housing,Progress"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Invisible College Seminar
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2025</p>
+                        <p class="mt-3 text-gray-300">
+                          Attended a week-long seminar in Cambridge.
+                        </p>
+                      </div>
                     </div>
+                  </div>
+                  <div class="timeline-item timeline-right" data-month="7">
+                    <div
+                      class="timeline-content"
+                      data-title="Graduated University"
+                      data-date="July 2025"
+                      data-details="Completed my degree in History from the University of Nottingham, receiving a 2.1 overall, and a 1st (78%) for my dissertation thesis entitled 'The 1947 Town and Country Planning Act: Origins and representations
+                            through a contemporary perspective'"
+                      data-skills="History,Research,Writing"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Graduated University
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">July 2025</p>
+                        <p class="mt-3 text-gray-300">
+                          Graduated from the University of Nottingham with a
+                          degree in History.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-year"><span>2024</span></div>
+                  <div class="timeline-item timeline-left" data-month="12">
+                    <div
+                      class="timeline-content"
+                      data-title="Internship at Dean Street Advisers"
+                      data-date="December 2024"
+                      data-details="Gained experience in M&A advisory and deal origination at a boutique advisory firm."
+                      data-skills="M&A,Deal Origination,Financial Research"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship at Dean Street Advisers
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">December 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Gained experience in M&A advisory and deal
+                          origination.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-item timeline-right" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Tract UK"
+                      data-date="May - Oct 2024"
+                      data-details="Worked in a position equivalent to Founder's Associate at a high-growth prop-tech startup, supporting the two founders as the 'first hire' during a major growth phase."
+                      data-skills="Startups,Venture Capital,Prop-Tech"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Tract UK
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">May - Oct 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Started as a Founder's Associate at a high-growth
+                          prop-tech startup.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-year"><span>2023</span></div>
+                  <div class="timeline-item timeline-left" data-month="7">
+                    <div
+                      class="timeline-content"
+                      data-title="Kindred for Business Internship"
+                      data-date="May - Sep 2023"
+                      data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics."
+                      data-skills="Data Analytics,Power BI,Commercialisation"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Kindred for Business Internship
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">May - Sep 2023</p>
+                        <p class="mt-3 text-gray-300">
+                          Aided in AI and commercialisation challenges in a
+                          B2B2C app monetisation start-up.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-year"><span>2022</span></div>
+                  <div class="timeline-item timeline-right" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Ruffer LLP Work Experience"
+                      data-date="August 2022"
+                      data-details="Gained insight into a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
+                      data-skills="Investment,Financial Analysis,Pitching"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Ruffer LLP Work Experience
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2022</p>
+                        <p class="mt-3 text-gray-300">
+                          Gained insight into a $36bn AUM L/S Multi-Strat
+                          investment fund.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-year"><span>2021</span></div>
+                  <div class="timeline-item timeline-left" data-month="9">
+                    <div
+                      class="timeline-content"
+                      data-title="Started University of Nottingham"
+                      data-date="Autumn 2021"
+                      data-details="Began studies in History, focusing on economic and political history."
+                      data-skills="History,Academics,University"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Started University of Nottingham
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">Autumn 2021</p>
+                        <p class="mt-3 text-gray-300">
+                          Began studies in History, focusing on economic and
+                          political history.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-item timeline-right" data-month="6">
+                    <div
+                      class="timeline-content"
+                      data-title="Left School"
+                      data-date="2021"
+                      data-details="Graduated from Bradfield College with A Levels in History, Economics, Politics, and an EPQ."
+                      data-skills="A-Levels,Economics,Politics,History"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Left School
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">2021</p>
+                        <p class="mt-3 text-gray-300">
+                          Graduated from Bradfield College with A Levels in
+                          History, Economics, Politics, and an EPQ.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
           </section>
 
@@ -1383,29 +1466,29 @@
               <div
                 class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
               >
-                <h3 class="font-semibold text-gray-100 text-base">
-                  Git-Release-Notes
-                </h3>
+                <h3 class="font-semibold text-gray-100 text-base">VINscout</h3>
                 <p class="mt-3 text-gray-300">
-                  A command-line tool that automatically generates release notes
-                  from git commit history.
+                  A community-based stolen vehicle recovery network.
                 </p>
-                <a href="#" class="text-sm text-amber-400 mt-4 inline-block"
-                  >View on Github</a
+                <a
+                  href="https://vin-scout.com"
+                  class="text-sm text-amber-400 mt-4 inline-block"
+                  >Visit here</a
                 >
               </div>
               <div
                 class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
               >
                 <h3 class="font-semibold text-gray-100 text-base">
-                  Posture-Bot
+                  Planning Bible
                 </h3>
                 <p class="mt-3 text-gray-300">
-                  An Arduino-powered robot that uses a camera to check your
-                  posture and remind you to sit up straight.
+                  A dictionary of terms for UK planning matters.
                 </p>
-                <a href="#" class="text-sm text-amber-400 mt-4 inline-block"
-                  >Read the case study</a
+                <a
+                  href="https://planningbible--plandex-uk.europe-west4.hosted.app/"
+                  class="text-sm text-amber-400 mt-4 inline-block"
+                  >Try it out</a
                 >
               </div>
               <div
@@ -1489,7 +1572,7 @@
         const timelineProgress = document.getElementById("timeline-progress");
         const timelineItems = document.querySelectorAll(".timeline-item");
         const timelineYears = document.querySelectorAll(".timeline-year");
-        
+
         // --- State Flags & Config ---
         let isAnimating = false;
         let isDocked = false;
@@ -1680,6 +1763,7 @@
         function endIntroSequence() {
           if (introTypingComplete) return;
           introTypingComplete = true;
+          sessionStorage.setItem("introPlayed", "true");
 
           initialisingContainer.style.opacity = "0";
           setTimeout(() => {
@@ -1889,35 +1973,134 @@
           }
         }
 
-        // --- Timeline Animation Logic ---
+        // --- Enhanced Timeline Animation Logic ---
+        const timelineContainer = document.querySelector(".timeline");
+        let currentTimelineItem = null;
+
+        function updateTimelineProgress() {
+          if (!timelineSection || !timelineProgress) return;
+          const sectionRect = timelineSection.getBoundingClientRect();
+          const sectionHeight = timelineSection.offsetHeight;
+          const viewportHeight = window.innerHeight;
+          const scrolledIntoView = Math.max(
+            0,
+            viewportHeight - sectionRect.top
+          );
+          const scrollProgress = Math.min(
+            1,
+            scrolledIntoView / (sectionHeight + viewportHeight)
+          );
+          const easedProgress =
+            scrollProgress < 0.5
+              ? 2 * scrollProgress * scrollProgress
+              : -1 + (4 - 2 * scrollProgress) * scrollProgress;
+          timelineProgress.style.height = `${easedProgress * 100}%`;
+          updateCurrentTimelineItem();
+        }
+
+        function updateCurrentTimelineItem() {
+          const viewportCenter = window.innerHeight / 2;
+          let closestItem = null;
+          let closestDistance = Infinity;
+          timelineItems.forEach((item) => {
+            const rect = item.getBoundingClientRect();
+            const itemCenter = rect.top + rect.height / 2;
+            const distance = Math.abs(itemCenter - viewportCenter);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestItem = item;
+            }
+            if (rect.top < viewportCenter - 100) {
+              item.classList.add("is-passed");
+            } else {
+              item.classList.remove("is-passed");
+            }
+          });
+          if (currentTimelineItem !== closestItem) {
+            if (currentTimelineItem) {
+              currentTimelineItem.classList.remove("is-current");
+            }
+            if (closestItem && closestDistance < 200) {
+              closestItem.classList.add("is-current");
+              currentTimelineItem = closestItem;
+            } else {
+              currentTimelineItem = null;
+            }
+          }
+        }
+
         const timelineItemObserver = new IntersectionObserver(
           (entries) => {
-            entries.forEach((entry) => {
+            entries.forEach((entry, index) => {
               if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
+                setTimeout(() => {
+                  entry.target.classList.add("is-visible");
+                }, index * 50);
               }
             });
           },
-          { threshold: 0.5 }
+          {
+            threshold: 0.3,
+            rootMargin: "0px 0px -100px 0px",
+          }
         );
-
         timelineItems.forEach((item) => timelineItemObserver.observe(item));
 
         const yearObserver = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
-              if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+              const rect = entry.boundingClientRect;
+              const viewportCenter = window.innerHeight / 2;
+              if (rect.top < viewportCenter && rect.bottom > 0) {
                 entry.target.classList.add("is-passed");
               } else {
                 entry.target.classList.remove("is-passed");
               }
             });
           },
-          { rootMargin: "0px 0px -100% 0px" }
+          {
+            rootMargin: "-50% 0px -50% 0px",
+            threshold: 0,
+          }
         );
-
         timelineYears.forEach((year) => yearObserver.observe(year));
 
+        let ticking = false;
+        function requestTick() {
+          if (!ticking) {
+            requestAnimationFrame(updateTimelineProgress);
+            ticking = true;
+            setTimeout(() => {
+              ticking = false;
+            }, 16); // ~60fps
+          }
+        }
+
+        function positionTimelineMarkers() {
+          const items = document.querySelectorAll(".timeline-item");
+          items.forEach((item) => {
+            const month = parseInt(item.dataset.month, 10);
+            if (!isNaN(month)) {
+              const yearProgress = (month - 1) / 11;
+              const topValue = 25 + yearProgress * 20;
+              item.style.setProperty("--marker-top", `${topValue}px`);
+            }
+          });
+        }
+
+        function addTimelineParallax() {
+          if (isTouchDevice) return;
+          timelineItems.forEach((item, index) => {
+            const speed = index % 2 === 0 ? 0.5 : 0.3;
+            window.addEventListener("scroll", () => {
+              const rect = item.getBoundingClientRect();
+              const yPos = rect.top * speed;
+              if (Math.abs(yPos) < 100) {
+                item.style.transform = `translateY(${yPos * 0.1}px)`;
+              }
+            });
+          });
+        }
 
         // --- Contact Box Toggle Logic ---
         function toggleContactBox(e) {
@@ -1946,7 +2129,9 @@
           if (!data.title) return;
           const skillsHtml = (data.skills || "")
             .split(",")
-            .map((skill) => skill.trim() ? `<span class="skill-tag">${skill}</span>` : "")
+            .map((skill) =>
+              skill.trim() ? `<span class="skill-tag">${skill}</span>` : ""
+            )
             .join("");
           modalBody.innerHTML = `
             <h3 class="font-pixel text-xl text-gray-100 mb-2">${data.title}</h3>
@@ -1967,67 +2152,56 @@
             const item = e.target.closest(".experience-item");
             if (item) openModal(item.dataset);
           });
-        document
-          .querySelectorAll(".timeline-content")
-          .forEach(el => el.addEventListener("click", (e) => {
+        document.querySelectorAll(".timeline-content").forEach((el) =>
+          el.addEventListener("click", (e) => {
             const item = e.target.closest(".timeline-content");
             if (item) openModal(item.dataset);
-          }));
+          })
+        );
         modalCloseBtn.addEventListener("click", closeModal);
         modalOverlay.addEventListener("click", (e) => {
           if (e.target === modalOverlay) closeModal();
         });
 
-        function positionTimelineMarkers() {
-          const items = document.querySelectorAll(".timeline-item");
-          items.forEach((item) => {
-            const month = parseInt(item.dataset.month, 10);
-            if (!isNaN(month)) {
-              const topValue = 45 - ((month - 1) / 11) * 30;
-              item.style.setProperty("--marker-top", `${topValue}px`);
-            }
-          });
-        }
-        
         // --- Collapsible Sections Logic ---
         function setupCollapsible(headingId) {
-            const heading = document.getElementById(headingId);
-            if (!heading) return;
+          const heading = document.getElementById(headingId);
+          if (!heading) return;
 
-            const contentWrapper = heading.nextElementSibling;
-            
-            heading.addEventListener('click', () => {
-                const isOpen = contentWrapper.classList.toggle('open');
-                heading.classList.toggle('collapsed', !isOpen);
-            });
+          const contentWrapper = heading.nextElementSibling;
+
+          heading.addEventListener("click", () => {
+            const isOpen = contentWrapper.classList.toggle("open");
+            heading.classList.toggle("collapsed", !isOpen);
+          });
         }
-        
+
         // --- Tabs Logic ---
         function setupTabs() {
-            const tabContainers = document.querySelectorAll('.tabs-container');
-            if (!tabContainers.length) return;
+          const tabContainers = document.querySelectorAll(".tabs-container");
+          if (!tabContainers.length) return;
 
-            tabContainers.forEach(container => {
-                const tabButtons = container.querySelectorAll('.tab-btn');
-                const tabContents = container.querySelectorAll('.tab-content');
+          tabContainers.forEach((container) => {
+            const tabButtons = container.querySelectorAll(".tab-btn");
+            const tabContents = container.querySelectorAll(".tab-content");
 
-                tabButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        const tabId = button.dataset.tab;
+            tabButtons.forEach((button) => {
+              button.addEventListener("click", () => {
+                const tabId = button.dataset.tab;
 
-                        tabButtons.forEach(btn => btn.classList.remove('active'));
-                        button.classList.add('active');
+                tabButtons.forEach((btn) => btn.classList.remove("active"));
+                button.classList.add("active");
 
-                        tabContents.forEach(content => {
-                            if (content.id === tabId) {
-                                content.classList.add('active');
-                            } else {
-                                content.classList.remove('active');
-                            }
-                        });
-                    });
+                tabContents.forEach((content) => {
+                  if (content.id === tabId) {
+                    content.classList.add("active");
+                  } else {
+                    content.classList.remove("active");
+                  }
                 });
+              });
             });
+          });
         }
 
         // --- Initializations ---
@@ -2059,23 +2233,32 @@
             document.addEventListener("keydown", handleSkipKey, { once: true });
           }
 
-          window.addEventListener("scroll", handleScroll);
-          initialisingAnimation();
+          window.addEventListener("scroll", () => {
+            handleScroll();
+            requestTick();
+          });
+          if (sessionStorage.getItem("introPlayed")) {
+            endIntroSequence();
+          } else {
+            initialisingAnimation();
+          }
           setInterval(updateClock, 1000);
           updateClock();
           createGrid();
-          positionTimelineMarkers();
 
           document.addEventListener("mousemove", handlePixelTrail);
           window.addEventListener("resize", createGrid);
           contactButtons.forEach((btn) =>
             btn.addEventListener("click", toggleContactBox)
           );
-          
-          setupCollapsible('done-heading');
-          setupCollapsible('experience-heading');
-          setupCollapsible('timeline-heading');
+
+          setupCollapsible("done-heading");
+          setupCollapsible("experience-heading");
+          setupCollapsible("timeline-heading");
           setupTabs();
+
+          positionTimelineMarkers();
+          updateTimelineProgress();
         }
 
         initialize();
