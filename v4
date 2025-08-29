@@ -1495,11 +1495,11 @@
                 class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
               >
                 <h3 class="font-semibold text-gray-100 text-base">
-                  SQL Query Parser
+                  Classic Boat Project
                 </h3>
                 <p class="mt-3 text-gray-300">
-                  A simple SQL parser written in Python to understand query
-                  structure and dependencies.
+                  Restoring a 1958 Albatross Continental Mk1. So far I've stripped the paint and taken apart the engine. At some point, when I've mastered the ins and outs of 1930s Ford 100e engines, I'll get the project finished.
+
                 </p>
                 <a href="#" class="text-sm text-amber-400 mt-4 inline-block"
                   >View on Github</a
