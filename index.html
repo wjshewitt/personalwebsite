@@ -1,0 +1,938 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Will Hewitt</title>
+
+    <!-- SEO / Social -->
+    <meta
+      name="description"
+      content="Will Hewitt — interests in housing, planning, startups, and private markets. London-based."
+    />
+    <meta property="og:title" content="Will Hewitt" />
+    <meta
+      property="og:description"
+      content="Housing, planning, startups, private markets."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://willhewitt.com/" />
+    <meta property="og:image" content="https://willhewitt.com/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://willhewitt.com/" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Will Hewitt",
+        "url": "https://willhewitt.com/",
+        "jobTitle": "History Graduate",
+        "description": "Interests in housing, planning, startups, and private markets. London-based.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "London",
+          "addressCountry": "GB"
+        },
+        "email": "hewittjswill@gmail.com"
+      }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Skip to content -->
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-gray-800 focus:text-amber-400 focus:px-3 focus:py-2 focus:rounded z-50"
+      >Skip to content</a
+    >
+
+    <!-- Theme switch -->
+    <div class="theme-switch-wrapper">
+      <label
+        class="theme-switch"
+        for="theme-checkbox"
+        aria-label="Toggle theme"
+      >
+        <input type="checkbox" id="theme-checkbox" />
+        <div class="slider round"></div>
+      </label>
+    </div>
+
+    <!-- Background grid -->
+    <div id="background-grid"></div>
+
+    <!-- Skip affordance + button -->
+    <div
+      id="skip-note"
+      class="fixed bottom-4 right-4 font-pixel text-xs text-gray-500 opacity-0 transition-opacity duration-500 z-50"
+    ></div>
+    <button
+      id="skip-btn"
+      class="fixed bottom-4 left-4 font-pixel text-xs text-gray-400 hover:text-amber-400 z-50"
+      type="button"
+    >
+      Skip intro
+    </button>
+
+    <!-- Terminal Intro -->
+    <div id="terminal-box">
+      <div id="terminal-header">
+        <div class="terminal-btn bg-red-500"></div>
+        <div class="terminal-btn bg-yellow-500"></div>
+        <div id="green-btn" class="terminal-btn bg-green-500"></div>
+      </div>
+      <div id="intro-container">
+        <div id="initialising-container">
+          <p id="initialising-text" class="font-pixel text-lg">
+            Initialising Website
+          </p>
+          <div id="progress-bar-container" class="mt-4">
+            <div id="progress-bar"></div>
+          </div>
+          <p id="progress-percentage" class="font-pixel text-sm mt-2">0%</p>
+        </div>
+        <h2 id="greeting" class="font-pixel text-gray-100 hidden"></h2>
+        <h1 id="dynamic-heading" class="font-bold text-gray-100 hidden"></h1>
+      </div>
+    </div>
+
+    <!-- Sticky header -->
+    <div id="sticky-header">
+      <div class="max-w-4xl mx-auto flex flex-col items-center py-2">
+        <div class="h-[1rem] mb-2"></div>
+        <div
+          id="sticky-socials"
+          class="w-full flex justify-between items-center mt-2 opacity-0 transition-opacity duration-300"
+        >
+          <a
+            href="https://www.linkedin.com/in/william-js-hewitt/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-link font-pixel text-sm"
+            >LinkedIn</a
+          >
+          <a
+            href="#"
+            class="social-link font-pixel text-sm contact-btn"
+            role="button"
+            >Contact</a
+          >
+          <a href="#" class="social-link font-pixel text-sm">Twitter</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="intro-spacer"></div>
+
+    <div id="page-content-wrapper">
+      <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-10 text-center">
+          <div id="header-trigger" class="h-1"></div>
+          <div
+            id="original-socials"
+            class="mt-4 flex justify-between items-center"
+          >
+            <a
+              href="https://www.linkedin.com/in/william-js-hewitt/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link font-pixel text-sm"
+              >LinkedIn</a
+            >
+            <a
+              href="#"
+              class="social-link font-pixel text-sm contact-btn"
+              role="button"
+              >Contact</a
+            >
+            <a href="#" class="social-link font-pixel text-sm">Twitter</a>
+          </div>
+          <div
+            id="contact-box-wrapper"
+            class="contact-box-wrapper"
+            aria-live="polite"
+          >
+            <div class="contact-box-inner">
+              <div id="contact-box">
+                <p>
+                  Please email me at:
+                  <a
+                    href="mailto:hewittjswill@gmail.com"
+                    class="text-amber-400 hover:text-amber-300"
+                    >hewittjswill@gmail.com</a
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main id="main">
+          <section class="mb-16">
+            <p class="text-gray-300 text-base md:text-lg leading-relaxed">
+              A 21-year-old history grad based in London. I'm interested in
+              housing, planning, startups, private markets, and anything else
+              derivative of or related to those things.
+              <br /><br />
+              I particularly enjoy reading, learning, questioning things, and
+              research. When I can, I like to tinker with boats, sail them,
+              climb things, watch motorsport, code projects and cross-country
+              run.
+            </p>
+            <div class="mt-6 mb-10" id="done-section">
+              <div
+                id="done-heading"
+                class="collapsible-heading"
+                aria-expanded="false"
+              >
+                <h3 class="subheading">things i've done recently</h3>
+                <span class="collapsible-toggle-icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div class="collapsible-content-wrapper closed">
+                <div class="collapsible-inner-content">
+                  <div class="glass-wrap">
+                    <div class="mt-2 text-gray-300">
+                      <ul class="list-disc list-inside space-y-3 pl-2">
+                        <li>
+                          Started writing my first substack article on housing.
+                          I hope to have this complete by September.
+                        </li>
+                        <li>
+                          Finished Invisible College in Cambridge with a bunch
+                          of other young people. We explored topics ranging from
+                          fermi estimations, to 20th century downzoning, and
+                          heard from people like the 'invention historian' Anton
+                          Howes, and Faculty AI CEO Marc Warner. It was a tiring
+                          but enormously fulfilling and motivating experience
+                          and I urge anyone age 18 - 22 to apply. Read more
+                          <a
+                            href="https://www.linkedin.com/posts/rachel-edwards-a27a737a_last-week-works-in-progress-hosted-the-second-activity-7360974066414997504-OVAz?utm_source=share&utm_medium=member_desktop&rcm=ACoAADTuFAYBdOf2dkt0abobumy3U49FRBaYgv4"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="content-link"
+                            >here</a
+                          >.
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <!-- /glass-wrap -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Experience -->
+          <section id="experience-section" class="mb-16">
+            <div
+              id="experience-heading"
+              class="collapsible-heading collapsed"
+              aria-expanded="false"
+            >
+              <h2 class="text-2xl font-semibold text-gray-100">Experience</h2>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="collapsible-content-wrapper">
+              <div class="collapsible-inner-content">
+                <div
+                  id="experience-container"
+                  class="flex flex-col gap-8 mt-12 p-4"
+                >
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Intern, Dean Street Advisers"
+                      data-date="Winter 2024"
+                      data-details="Intern at a boutique M&amp;A advisory firm, specialising in Public-Private market transactions. Worked primarily on deal origination and research, utilising FactSet and other data sources to identify take-private scenarios. Through meetings with VC and PE firms including Carlyle, Bain, and Mercuri, as well as other business activities, gained an increased appreciation for withholding market-sensitive information. Supported the Managing Partner in pitching an asset disposal to a partner at Bain capital."
+                      data-skills="M&A,Deal Origination,Financial Research,FactSet"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Intern, Dean Street Advisers
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">Winter 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Pitched an asset disposal to a partner at Bain
+                          capital.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-end">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Intern and Founder's Associate, Tract UK"
+                      data-date="May - October 2024"
+                      data-details="Joined immediately after the pre-seed raise at a fast-growing AI prop-tech startup, as the first ‘hire’, helping the two cofounders full-time with a variety of tasks and projects during a major growth phase. Met and liaised with investors, managed the website and product launch, and built a marketing strategy to target rural landowners. Through meetings with investors, and internal discussions, I enhanced my understanding of the dynamics of private markets, particularly early stage venture capital dynamics in the UK.<br><br>I'm really proud and grateful for my time at Tract, playing even a small role in trying to ease the UK's housing crisis is what got me so interested in the topic of housing, and startups more broadly.<br><br>Tract was shuttered in April 2025 after Jamie and Henry (Tract's Founders) realised there was not a clear path to venture-scale returns. You can read their full and widely lauded postmortem here <a href='https://buildwithtract.com/' class='text-amber-400 hover:text-amber-300' target='_blank' rel='noopener noreferrer'>Tract Postmortem</a>."
+                      data-skills="Venture Capital,Marketing Strategy,Investor Relations,Product Launch"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Intern and Founder's Associate, Tract UK
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">
+                          May - October 2024
+                        </p>
+                        <p class="mt-3 text-gray-300">
+                          Supported the two founders as the 'first hire' during
+                          a major growth phase.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Internship, Kindred for Business"
+                      data-date="May - September 2023"
+                      data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics. Grew relationships with individuals across my team and the business, solving a variety of challenges and creating viable long-term solutions relating to data visualisation, particularly through the use of Microsoft Power BI."
+                      data-skills="Data Analytics,Power BI,Google Analytics,Commercialisation"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship, Kindred for Business
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">
+                          May - September 2023
+                        </p>
+                        <p class="mt-3 text-gray-300">
+                          Aided in AI and commercialisation challenges in a
+                          B2B2C app monetisation start-up.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-end">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Work Experience, Ruffer LLP"
+                      data-date="August 2022"
+                      data-details="Awarded a place on Ruffer’s Work Experience programme, ‘Ruffer Academy’, gaining an insight into the workings of a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
+                      data-skills="Investment Analysis,Equity Research,Pitching,Collaboration"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Work Experience, Ruffer LLP
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2022</p>
+                        <p class="mt-3 text-gray-300">
+                          Pitched a chosen stock to partners as part of a
+                          competition, with our group winning.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex w-full justify-start">
+                    <div
+                      class="experience-item w-full md:w-5/6 lg:w-3/4"
+                      data-title="Internship, Media Intelligence Partners"
+                      data-date="October 2021"
+                      data-details="Worked for a political communications and PR firm helping around the office on various tasks. Authored articles for a client’s website with 30-40k monthly traffic, in addition to formulating content on the Budget. Learnt valuable interpersonal skills and discretion surrounding the handling of privileged information. Drafted press releases for influential think tanks including the Centre for Social Justice (CSJ)."
+                      data-skills="Political Communications,PR,Content Creation,Writing"
+                    >
+                      <div class="p-4">
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship, Media Intelligence Partners
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">October 2021</p>
+                        <p class="mt-3 text-gray-300">
+                          Authored articles for a client’s website with 30-40k
+                          monthly traffic.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Timeline -->
+          <section id="timeline-section" class="mb-16">
+            <div
+              id="timeline-heading"
+              class="collapsible-heading collapsed"
+              aria-expanded="false"
+            >
+              <h2 class="text-2xl font-semibold text-gray-100">Timeline</h2>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="collapsible-content-wrapper">
+              <div class="collapsible-inner-content">
+                <div class="timeline mt-12 relative">
+                  <div class="timeline-line-container">
+                    <div
+                      id="timeline-progress"
+                      class="timeline-line-progress"
+                    ></div>
+                  </div>
+
+                  <div class="timeline-year">
+                    <span aria-label="Timeline year 2025">2025</span>
+                  </div>
+                  <div class="timeline-item timeline-left" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Invisible College Seminar"
+                      data-date="August 2025"
+                      data-details="Attended a week-long seminar in Cambridge run by Works in Progress, a subsidiary of Stripe covering AI, Biosciences, Robotics, and Urban Design. Had talks from Anton Howes on the origins of the Industrial Revolution, learnt about bad science from Stuart Ritchie, and presented a lightning talk judged by Marc Warner, CEO of Faculty AI"
+                      data-skills="AI,Bioscience,Robotics,Urban Design,Housing,Progress"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Invisible College Seminar
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2025</p>
+                        <p class="mt-3 text-gray-300">
+                          Attended a week-long seminar in Cambridge.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-item timeline-right" data-month="7">
+                    <div
+                      class="timeline-content"
+                      data-title="Graduated University"
+                      data-date="July 2025"
+                      data-details="Completed my degree in History from the University of Nottingham, receiving a 2.1 overall, and a 1st (78%) for my dissertation thesis entitled 'The 1947 Town and Country Planning Act: Origins and representations through a contemporary perspective'"
+                      data-skills="History,Research,Writing"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Graduated University
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">July 2025</p>
+                        <p class="mt-3 text-gray-300">
+                          Graduated from the University of Nottingham with a
+                          degree in History.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-year"><span aria-label="Timeline year 2024">2024</div>
+                  <div class="timeline-item timeline-left" data-month="12">
+                    <div
+                      class="timeline-content"
+                      data-title="Internship at Dean Street Advisers"
+                      data-date="December 2024"
+                      data-details="Gained experience in M&amp;A advisory and deal origination at a boutique advisory firm."
+                      data-skills="M&A,Deal Origination,Financial Research"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Internship at Dean Street Advisers
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">December 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Gained experience in M&amp;A advisory and deal
+                          origination.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-item timeline-right" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Tract UK"
+                      data-date="May - Oct 2024"
+                      data-details="Worked in a position equivalent to Founder's Associate at a high-growth prop-tech startup, supporting the two founders as the 'first hire' during a major growth phase."
+                      data-skills="Startups,Venture Capital,Prop-Tech"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Tract UK
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">May - Oct 2024</p>
+                        <p class="mt-3 text-gray-300">
+                          Started as a Founder's Associate at a high-growth
+                          prop-tech startup.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-year"><span aria-label="Timeline year 2023">2023</div>
+                  <div class="timeline-item timeline-left" data-month="7">
+                    <div
+                      class="timeline-content"
+                      data-title="Kindred for Business Internship"
+                      data-date="May - Sep 2023"
+                      data-details="Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics."
+                      data-skills="Data Analytics,Power BI,Commercialisation"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Kindred for Business Internship
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">May - Sep 2023</p>
+                        <p class="mt-3 text-gray-300">
+                          Aided in AI and commercialisation challenges in a
+                          B2B2C app.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-year"><span aria-label="Timeline year 2022">2022</div>
+                  <div class="timeline-item timeline-right" data-month="8">
+                    <div
+                      class="timeline-content"
+                      data-title="Ruffer LLP Work Experience"
+                      data-date="August 2022"
+                      data-details="Gained insight into a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning."
+                      data-skills="Investment,Financial Analysis,Pitching"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Ruffer LLP Work Experience
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">August 2022</p>
+                        <p class="mt-3 text-gray-300">
+                          Insight into a $36bn AUM L/S Multi-Strat investment
+                          fund.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-year"><span aria-label="Timeline year 2021">2021</div>
+                  <div class="timeline-item timeline-left" data-month="9">
+                    <div
+                      class="timeline-content"
+                      data-title="Started University of Nottingham"
+                      data-date="Autumn 2021"
+                      data-details="Began studies in History, focusing on economic and political history."
+                      data-skills="History,Academics,University"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Started University of Nottingham
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">Autumn 2021</p>
+                        <p class="mt-3 text-gray-300">
+                          Focused on economic and political history.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timeline-item timeline-right" data-month="6">
+                    <div
+                      class="timeline-content"
+                      data-title="Left School"
+                      data-date="2021"
+                      data-details="Graduated from Bradfield College with A Levels in History, Economics, Politics, and an EPQ."
+                      data-skills="A-Levels,Economics,Politics,History"
+                    >
+                      <div>
+                        <h3 class="font-semibold text-gray-100 text-base">
+                          Left School
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">2021</p>
+                        <p class="mt-3 text-gray-300">
+                          A Levels in History, Economics, Politics, and EPQ.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Projects -->
+          <section id="projects-section" class="mb-16">
+            <h2 class="text-2xl font-semibold text-gray-100 mb-6">Projects</h2>
+            <div
+              id="projects-container"
+              class="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div
+                class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
+              >
+                <h3 class="font-semibold text-gray-100 text-base">VINscout</h3>
+                <p class="mt-3 text-gray-300">
+                  A community-based stolen vehicle recovery network.
+                </p>
+                <a
+                  href="https://vin-scout.com"
+                  class="text-sm text-amber-400 mt-4 inline-block"
+                  >Visit here</a
+                >
+              </div>
+              <div
+                class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
+              >
+                <h3 class="font-semibold text-gray-100 text-base">
+                  Planning Bible
+                </h3>
+                <p class="mt-3 text-gray-300">
+                  A dictionary of terms for UK planning matters.
+                </p>
+                <a
+                  href="https://planningbible--plandex-uk.europe-west4.hosted.app/"
+                  class="text-sm text-amber-400 mt-4 inline-block"
+                  >Try it out</a
+                >
+              </div>
+              <div
+                class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
+              >
+                <h3 class="font-semibold text-gray-100 text-base">
+                  SQL Query Parser
+                </h3>
+                <p class="mt-3 text-gray-300">
+                  A simple SQL parser written in Python to understand query
+                  structure.
+                </p>
+                <a href="#" class="text-sm text-amber-400 mt-4 inline-block"
+                  >View on Github</a
+                >
+              </div>
+            </div>
+          </section>
+
+          <!-- Library -->
+          <section id="library-section" class="mb-16">
+            <div
+              id="library-heading"
+              class="collapsible-heading collapsed"
+              aria-expanded="false"
+            >
+              <div>
+                <h2 class="text-2xl font-semibold text-gray-100 mb-2">
+                  Library
+                </h2>
+                <p class="text-gray-400">
+                  A few books and articles I rate highly across housing,
+                  startups, policy, and progress.
+                </p>
+              </div>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="collapsible-content-wrapper">
+              <div class="collapsible-inner-content">
+                <div class="tabs-container">
+                  <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="tab-books">
+                      Books
+                    </button>
+                    <button class="tab-btn" data-tab="tab-articles">
+                      Articles
+                    </button>
+                  </div>
+
+                  <div id="tab-books" class="tab-content active">
+                    <div class="library-grid">
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            The Housing Theory of Everything
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">
+                            Sam Bowman et al.
+                          </p>
+                          <p class="mt-3 text-gray-300">
+                            A clean synthesis of why housing constraints drag on
+                            growth.
+                          </p>
+                          <div>
+                            <span class="tag">Housing</span
+                            ><span class="tag">Policy</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            Where Is My Flying Car?
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">
+                            J. Storrs Hall
+                          </p>
+                          <p class="mt-3 text-gray-300">
+                            On progress, energy density, and why the future
+                            stalled.
+                          </p>
+                          <div>
+                            <span class="tag">Progress</span
+                            ><span class="tag">Tech</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            The Power Broker
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">Robert Caro</p>
+                          <p class="mt-3 text-gray-300">
+                            Masterclass in power, planning, and unintended
+                            consequences.
+                          </p>
+                          <div>
+                            <span class="tag">Planning</span
+                            ><span class="tag">History</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="tab-articles" class="tab-content">
+                    <div class="library-grid">
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            A Country of Cities
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">
+                            Vishaan Chakrabarti (excerpt)
+                          </p>
+                          <p class="mt-3 text-gray-300">
+                            Urban density as an engine for growth and
+                            sustainability.
+                          </p>
+                          <div>
+                            <span class="tag">Urbanism</span
+                            ><span class="tag">Design</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            The Case Against Overregulation
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">Assorted</p>
+                          <p class="mt-3 text-gray-300">
+                            How excess rules throttle experimentation and
+                            progress.
+                          </p>
+                          <div>
+                            <span class="tag">Policy</span
+                            ><span class="tag">Progress</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="library-card">
+                        <div class="cover"></div>
+                        <div class="p-4">
+                          <h3 class="font-semibold text-gray-100 text-base">
+                            Lessons from YC’s Startup Playbook
+                          </h3>
+                          <p class="text-sm text-gray-400 mt-1">YC</p>
+                          <p class="mt-3 text-gray-300">
+                            Focus, speed, and talking to customers — still
+                            undefeated.
+                          </p>
+                          <div>
+                            <span class="tag">Startups</span
+                            ><span class="tag">Execution</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer
+          id="footer-section"
+          class="font-pixel text-xs text-gray-500 mt-20 pt-8 border-t border-gray-800"
+        >
+          <div
+            class="flex flex-col sm:flex-row justify-between items-center gap-4"
+          >
+            <p>
+              Let's connect:
+              <a
+                href="mailto:hewittjswill@gmail.com"
+                class="text-amber-400 hover:text-amber-300"
+                >hewittjswill@gmail.com</a
+              >
+            </p>
+            <p id="time-location">
+              London (GMT) <span id="clock" class="text-gray-400"></span>
+            </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Side Quick Nav (integrated handle, left dots) -->
+    <nav
+      id="side-nav"
+      class="side-quick-nav"
+      aria-label="Quick section navigation"
+    >
+      <div class="side-nav-panel">
+        <button
+          id="side-nav-handle"
+          class="side-nav-handle"
+          aria-expanded="false"
+          aria-controls="side-nav-list"
+          title="Quick nav"
+          type="button"
+        >
+          <span class="bars"></span>
+        </button>
+        <ul id="side-nav-list" class="side-nav-list">
+          <li>
+            <a class="side-nav-item" href="#main" aria-label="About">
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">About</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="side-nav-item"
+              href="#experience-section"
+              aria-label="Experience"
+            >
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">Experience</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="side-nav-item"
+              href="#timeline-section"
+              aria-label="Timeline"
+            >
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">Timeline</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="side-nav-item"
+              href="#projects-section"
+              aria-label="Projects"
+            >
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">Projects</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="side-nav-item"
+              href="#library-section"
+              aria-label="Library"
+            >
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">Library</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="side-nav-item"
+              href="#footer-section"
+              aria-label="Contact"
+            >
+              <span class="side-nav-dot" aria-hidden="true"></span>
+              <span class="side-nav-label">Contact</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Modal -->
+    <div
+      id="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-hidden="true"
+    >
+      <div id="modal-content">
+        <button id="modal-close-btn" aria-label="Close modal">&times;</button>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <script defer src="script.js"></script>
+  </body>
+</html>
+```
