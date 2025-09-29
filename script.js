@@ -23,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const progressBar = document.getElementById("progress-bar");
   const progressPercentage = document.getElementById("progress-percentage");
-  const timelineSection = document.getElementById("timeline-section");
-  const timelineProgress = document.getElementById("timeline-progress");
-  const timelineItems = document.querySelectorAll(".timeline-item");
-  const timelineYears = document.querySelectorAll(".timeline-year");
+  const timelineRoot = document.getElementById("timeline-component");
+  let timelineItems = [];
+  let timelineYears = [];
+  let timelineContents = [];
 
   // State
   let isAnimating = false;
@@ -45,17 +45,263 @@ document.addEventListener("DOMContentLoaded", () => {
   promptElement.style.whiteSpace = "pre";
   const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const timelineData = [
+    {
+      year: 2025,
+      entries: [
+        {
+          month: 8,
+          title: "Invisible College Seminar",
+          date: "August 2025",
+          summary: "Attended a week-long seminar in Cambridge.",
+          details:
+            "Attended a week-long seminar in Cambridge run by Works in Progress, a subsidiary of Stripe covering AI, Biosciences, Robotics, and Urban Design. Had talks from Anton Howes on the origins of the Industrial Revolution, learnt about bad science from Stuart Ritchie, and presented a lightning talk judged by Marc Warner, CEO of Faculty AI",
+          skills: "AI,Bioscience,Robotics,Urban Design,Housing,Progress",
+        },
+        {
+          month: 7,
+          title: "Graduated University",
+          date: "July 2025",
+          summary:
+            "Graduated from the University of Nottingham with a degree in History.",
+          details:
+            "Completed my degree in History from the University of Nottingham, receiving a 2.1 overall, and a 1st (78%) for my dissertation thesis entitled 'The 1947 Town and Country Planning Act: Origins and representations through a contemporary perspective'",
+          skills: "History,Research,Writing",
+        },
+      ],
+    },
+    {
+      year: 2024,
+      entries: [
+        {
+          month: 12,
+          title: "Internship at Dean Street Advisers",
+          date: "December 2024",
+          summary: "Gained experience in M&A advisory and deal origination.",
+          details:
+            "Gained experience in M&A advisory and deal origination at a boutique advisory firm.",
+          skills: "M&A,Deal Origination,Financial Research",
+        },
+        {
+          month: 8,
+          title: "Tract UK",
+          date: "May - Oct 2024",
+          summary:
+            "Started as a Founder's Associate at a high-growth prop-tech startup.",
+          details:
+            "Joined immediately after the pre-seed raise at a fast-growing AI prop-tech startup, as the first ‘hire’, helping the two cofounders full-time with a variety of tasks and projects during a major growth phase. Met and liaised with investors, managed the website and product launch, and built a marketing strategy to target rural landowners. Through meetings with investors, and internal discussions, I enhanced my understanding of the dynamics of private markets, particularly early stage venture capital dynamics in the UK.<br><br>I'm really proud and grateful for my time at Tract, playing even a small role in trying to ease the UK's housing crisis is what got me so interested in the topic of housing, and startups more broadly.<br><br>Tract was shuttered in April 2025 after Jamie and Henry (Tract's Founders) realised there was not a clear path to venture-scale returns. You can read their full and widely lauded postmortem here <a href='https://buildwithtract.com/' class='text-amber-400 hover:text-amber-300' target='_blank' rel='noopener noreferrer'>Tract Postmortem</a>.",
+          skills: "Startups,Venture Capital,Prop-Tech",
+        },
+      ],
+    },
+    {
+      year: 2023,
+      entries: [
+        {
+          month: 7,
+          title: "Kindred for Business Internship",
+          date: "May - Sep 2023",
+          summary: "Aided in AI and commercialisation challenges in a B2B2C app.",
+          details:
+            "Aided in AI and commercialisation challenges in a B2B2C app monetisation start-up. Gained important hard skills in relation to understanding data analytics and financial metrics through the utilisation of MS Power BI and Google Analytics.",
+          skills: "Data Analytics,Power BI,Commercialisation",
+        },
+      ],
+    },
+    {
+      year: 2022,
+      entries: [
+        {
+          month: 8,
+          title: "Ruffer LLP Work Experience",
+          date: "August 2022",
+          summary:
+            "Insight into a $36bn AUM L/S Multi-Strat investment fund.",
+          details:
+            "Gained insight into a $36bn AUM L/S Multi-Strat investment fund. Used fundamental and technical analysis, to assess whether to invest in an equity. Worked collaboratively with my group in pitching the chosen stock to partners as part of a competition, with our group winning.",
+          skills: "Investment,Financial Analysis,Pitching",
+        },
+      ],
+    },
+    {
+      year: 2021,
+      entries: [
+        {
+          month: 9,
+          title: "Started University of Nottingham",
+          date: "Autumn 2021",
+          summary: "Focused on economic and political history.",
+          details:
+            "Began studies in History, focusing on economic and political history.",
+          skills: "History,Academics,University",
+        },
+        {
+          month: 6,
+          title: "Left School",
+          date: "2021",
+          summary:
+            "A Levels in History, Economics, Politics, and EPQ.",
+          details:
+            "Graduated from Bradfield College with A Levels in History, Economics, Politics, and an EPQ.",
+          skills: "A-Levels,Economics,Politics,History",
+        },
+      ],
+    },
+  ];
+
+  let currentObserver;
+  let timelineItemObserver;
+  let yearObserver;
+
+  function populateTimeline() {
+    if (!timelineRoot) return;
+    timelineRoot.innerHTML = '<div class="timeline-line" aria-hidden="true"></div>';
+
+    const frag = document.createDocumentFragment();
+    let itemIndex = 0;
+
+    timelineData.forEach(({ year, entries }) => {
+      const yearEl = document.createElement("div");
+      yearEl.className = "timeline-year";
+      yearEl.innerHTML = `<span aria-label="Timeline year ${year}">${year}</span>`;
+      frag.appendChild(yearEl);
+
+      entries.forEach((entry) => {
+        const side = itemIndex % 2 === 0 ? "left" : "right";
+        const itemEl = document.createElement("article");
+        itemEl.className = `timeline-item ${side}`;
+        itemEl.dataset.month = `${entry.month}`;
+        itemEl.dataset.title = entry.title;
+        itemEl.dataset.date = entry.date;
+        itemEl.dataset.details = entry.details;
+        itemEl.dataset.skills = entry.skills || "";
+
+        const contentEl = document.createElement("div");
+        contentEl.className = "timeline-content";
+        contentEl.setAttribute("role", "button");
+        contentEl.setAttribute("tabindex", "0");
+        contentEl.setAttribute("aria-label", entry.title);
+        contentEl.innerHTML = `
+          <h3 class="font-semibold text-gray-100 text-base">${entry.title}</h3>
+          <p class="text-sm text-gray-400 mt-1">${entry.date}</p>
+          <p class="mt-3 text-gray-300">${entry.summary}</p>
+        `;
+
+        itemEl.appendChild(contentEl);
+        frag.appendChild(itemEl);
+        itemIndex += 1;
+      });
+    });
+
+    timelineRoot.appendChild(frag);
+    timelineItems = Array.from(timelineRoot.querySelectorAll(".timeline-item"));
+    timelineYears = Array.from(timelineRoot.querySelectorAll(".timeline-year"));
+    timelineContents = Array.from(
+      timelineRoot.querySelectorAll(".timeline-content")
+    );
+    currentTimelineItem = null;
+  }
+
+  function updateTimelineFill() {
+    if (!timelineRoot || !timelineItems.length) return;
+    const rect = timelineRoot.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const distanceInto = viewportHeight - rect.top;
+    const range = rect.height + viewportHeight;
+    const progressScroll = range > 0 ? clamp(distanceInto / range, 0, 1) : 0;
+    const visibleCount = timelineItems.filter((item) =>
+      item.classList.contains("is-visible")
+    ).length;
+    const progressSeen = timelineItems.length
+      ? clamp(visibleCount / timelineItems.length, 0, 1)
+      : 0;
+    const progress = Math.max(progressSeen, progressScroll);
+    timelineRoot.style.setProperty("--line-fill", `${(progress * 100).toFixed(2)}%`);
+  }
+
+  function setupTimelineObservers() {
+    if (currentObserver) currentObserver.disconnect();
+    if (timelineItemObserver) timelineItemObserver.disconnect();
+    if (yearObserver) yearObserver.disconnect();
+
+    if (reduceMotion) {
+      timelineItems.forEach((item) => item.classList.add("is-visible"));
+      updateTimelineFill();
+    } else {
+      timelineItemObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const delay = timelineItems.indexOf(entry.target) * 40;
+            setTimeout(() => {
+              entry.target.classList.add("is-visible");
+              updateTimelineFill();
+              if (timelineItemObserver) timelineItemObserver.unobserve(entry.target);
+            }, Math.max(delay, 0));
+          });
+        },
+        { threshold: 0.25, rootMargin: "0px 0px -12%" }
+      );
+      timelineItems.forEach((item) => timelineItemObserver.observe(item));
+    }
+
+    currentObserver = new IntersectionObserver(
+      () => {
+        const viewportCenter = window.innerHeight / 2;
+        let closestItem = null;
+        let closestDistance = Infinity;
+
+        timelineItems.forEach((item) => {
+          const rect = item.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const dist = Math.abs(center - viewportCenter);
+          if (dist < closestDistance) {
+            closestDistance = dist;
+            closestItem = item;
+          }
+        });
+
+        if (currentTimelineItem !== closestItem) {
+          currentTimelineItem?.classList.remove("is-current");
+          if (closestItem && closestDistance < 220)
+            closestItem.classList.add("is-current");
+          currentTimelineItem = closestItem;
+        }
+      },
+      { root: null, rootMargin: "-40% 0px -40% 0px", threshold: [0.25, 0.5, 0.75] }
+    );
+    timelineContents.forEach((el) => currentObserver.observe(el));
+
+    yearObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const rect = entry.boundingClientRect;
+          const viewportCenter = window.innerHeight / 2;
+          if (rect.top < viewportCenter && rect.bottom > 0)
+            entry.target.classList.add("is-passed");
+          else entry.target.classList.remove("is-passed");
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
+    );
+    timelineYears.forEach((year) => yearObserver.observe(year));
+
+    updateTimelineFill();
+  }
+
   // Intro animation
   async function initialisingAnimation() {
-    if (reduceMotion) return;
     let progress = 0;
-    const totalDuration = 3000;
+    const totalDuration = reduceMotion ? 500 : 3000; // Shorter duration for reduced motion
     let startTime = null;
+    
     function animateProgress(ts) {
       if (animationSkipped) return;
       if (!startTime) startTime = ts;
       const elapsed = ts - startTime;
-      const ease = 1 - Math.pow(1 - elapsed / totalDuration, 4);
+      const ease = reduceMotion ? elapsed / totalDuration : 1 - Math.pow(1 - elapsed / totalDuration, 4);
       progress = Math.min(100, ease * 100);
       progressBar.style.width = progress + "%";
       progressPercentage.textContent = Math.floor(progress) + "%";
@@ -70,8 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
             greetingElement.classList.remove("hidden");
             headingElement.classList.remove("hidden");
             mainAnimationController();
-          }, 300);
-        }, 200);
+          }, reduceMotion ? 100 : 300);
+        }, reduceMotion ? 100 : 200);
       }
     }
     requestAnimationFrame(animateProgress);
@@ -367,85 +613,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* Timeline anim/progress */
+  /* Timeline visibility/highlight */
   let currentTimelineItem = null;
-  function updateTimelineProgress() {
-    if (!timelineSection || !timelineProgress) return;
-    const sectionRect = timelineSection.getBoundingClientRect();
-    const sectionHeight = timelineSection.offsetHeight;
-    const viewportHeight = window.innerHeight;
-    const scrolled = Math.max(0, viewportHeight - sectionRect.top);
-    const total = sectionHeight + viewportHeight;
-    const progress = Math.max(0, Math.min(1, scrolled / total));
-    timelineProgress.style.top = `${progress * 100}%`;
-    timelineProgress.style.height = `${(1 - progress) * 100}%`;
-    updateCurrentTimelineItem();
-  }
-  function updateCurrentTimelineItem() {
+  function updatePassed() {
+    if (!timelineItems.length) return;
     const viewportCenter = window.innerHeight / 2;
-    let closestItem = null;
-    let closestDistance = Infinity;
     timelineItems.forEach((item) => {
       const rect = item.getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const dist = Math.abs(center - viewportCenter);
-      if (dist < closestDistance) {
-        closestDistance = dist;
-        closestItem = item;
-      }
       if (rect.top < viewportCenter - 100) item.classList.add("is-passed");
       else item.classList.remove("is-passed");
     });
-    if (currentTimelineItem !== closestItem) {
-      if (currentTimelineItem)
-        currentTimelineItem.classList.remove("is-current");
-      if (closestItem && closestDistance < 220)
-        closestItem.classList.add("is-current");
-      currentTimelineItem = closestItem;
-    }
+    updateTimelineFill();
   }
-  const timelineItemObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(
-            () => entry.target.classList.add("is-visible"),
-            index * 40
-          );
-        }
-      });
-    },
-    { threshold: 0.25, rootMargin: "0px 0px -12%" }
-  );
-  timelineItems.forEach((item) => timelineItemObserver.observe(item));
-
-  const yearObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const rect = entry.boundingClientRect;
-        const viewportCenter = window.innerHeight / 2;
-        if (rect.top < viewportCenter && rect.bottom > 0)
-          entry.target.classList.add("is-passed");
-        else entry.target.classList.remove("is-passed");
-      });
-    },
-    { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
-  );
-  timelineYears.forEach((year) => yearObserver.observe(year));
-
-  let ticking = false;
-  function requestTick() {
-    if (!ticking) {
-      requestAnimationFrame(updateTimelineProgress);
-      ticking = true;
-      setTimeout(() => {
-        ticking = false;
-      }, 16);
-    }
+  // debounce helper scoped here
+  function debounce(func, delay) {
+    let timeoutId;
+    return function (...args) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
   }
 
   function positionTimelineMarkers() {
-    document.querySelectorAll(".timeline-item").forEach((item) => {
+    timelineItems.forEach((item) => {
       const month = parseInt(item.dataset.month, 10);
       if (!isNaN(month)) {
         const yearProgress = (month - 1) / 11;
@@ -454,6 +644,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  const debouncedTimelineMetrics = debounce(() => {
+    positionTimelineMarkers();
+    updateTimelineFill();
+  }, 150);
 
   // Theme
   function applyTheme(theme) {
@@ -524,12 +719,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const item = e.target.closest(".experience-item");
       if (item) openModal(item.dataset);
     });
-  document.querySelectorAll(".timeline-content").forEach((el) =>
-    el.addEventListener("click", (e) => {
-      const item = e.target.closest(".timeline-content");
-      if (item) openModal(item.dataset);
-    })
-  );
+  timelineRoot?.addEventListener("click", (e) => {
+    const item = e.target.closest(".timeline-content");
+    if (item) openModal(item.dataset);
+  });
   modalCloseBtn.addEventListener("click", closeModal);
   modalOverlay.addEventListener("click", (e) => {
     if (e.target === modalOverlay) closeModal();
@@ -551,16 +744,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-  document.querySelectorAll(".timeline-content").forEach((item) => {
-    item.tabIndex = 0;
-    item.setAttribute("role", "button");
-    item.setAttribute("aria-label", `Open details for ${item.dataset.title}`);
-    item.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openModal(item.dataset);
-      }
-    });
+  timelineRoot?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const target = e.target.closest?.(".timeline-content");
+    if (!target) return;
+    e.preventDefault();
+    openModal(target.dataset);
   });
 
   // Collapsibles (with ARIA)
@@ -589,6 +778,13 @@ document.addEventListener("DOMContentLoaded", () => {
             block: "start",
           });
         }, 100); // Delay to allow animation
+      }
+      if (headingId === "timeline-heading" && isOpen) {
+        debouncedTimelineMetrics();
+        setTimeout(() => {
+          setupTimelineObservers();
+          updatePassed();
+        }, 120);
       }
     };
     heading.addEventListener("click", toggle);
@@ -621,6 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function initialize() {
     try {
       const savedTheme = localStorage.getItem("theme");
+
       if (savedTheme) applyTheme(savedTheme);
       else
         applyTheme(
@@ -631,6 +828,12 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       applyTheme("dark");
     }
+
+    populateTimeline();
+    positionTimelineMarkers();
+    setupTimelineObservers();
+    updatePassed();
+    updateTimelineFill();
 
     if (isTouchDevice) {
       skipNote.textContent = "Tap to skip";
@@ -643,12 +846,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     skipBtn?.addEventListener("click", skipAnimation);
 
-    window.addEventListener("scroll", () => {
-      handleScroll();
-      requestTick();
-    });
+    window.addEventListener(
+      "scroll",
+      () => {
+        handleScroll();
+        updatePassed();
+      },
+      { passive: true }
+    );
 
-    if (reduceMotion) sessionStorage.setItem("introPlayed", "true");
+    // Check if intro has been played before, but don't skip for reduced motion preference alone
     if (sessionStorage.getItem("introPlayed")) {
       endIntroSequence();
     } else {
@@ -659,7 +866,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateClock();
     createGrid();
     document.addEventListener("mousemove", handlePixelTrail);
-    // Remove duplicate resize listener, use debounced one
+    const debouncedCreateGrid = debounce(createGrid, 100);
+    window.addEventListener("resize", debouncedCreateGrid);
+    window.addEventListener("resize", debouncedTimelineMetrics);
 
     // Contact buttons: scroll to footer instead of toggling contact box
     const footer = document.getElementById("footer-section");
@@ -682,7 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupCollapsible("library-heading");
     setupTabs();
     positionTimelineMarkers();
-    updateTimelineProgress();
+    updatePassed();
   }
 
   initialize();
@@ -806,33 +1015,11 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", markActive, { passive: true });
     window.addEventListener("resize", markActive);
   })();
-});
 
-// Simple debounce function for performance
-function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
-// Use debounced resize for createGrid
-const debouncedCreateGrid = debounce(createGrid, 100);
-window.addEventListener("resize", debouncedCreateGrid);
-
-// Add error handling to key functions
-function safeQuerySelector(selector) {
-  try {
-    return document.querySelector(selector);
-  } catch (e) {
-    console.warn("Selector failed:", selector, e);
-    return null;
-  }
-}
-
-// Update timeline observer disconnection on unload
-window.addEventListener("beforeunload", () => {
-  timelineItemObserver.disconnect();
-  yearObserver.disconnect();
+  // Disconnect observers on unload
+  window.addEventListener("beforeunload", () => {
+    if (timelineItemObserver) timelineItemObserver.disconnect();
+    if (yearObserver) yearObserver.disconnect();
+    if (currentObserver) currentObserver.disconnect();
+  });
 });
