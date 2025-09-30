@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const headingElement = document.getElementById("dynamic-heading");
   const skipNote = document.getElementById("skip-note");
   const skipBtn = document.getElementById("skip-btn");
+  const clearGridBtn = document.getElementById("clear-grid-btn");
   const stickyHeader = document.getElementById("sticky-header");
   const stickySocials = document.getElementById("sticky-socials");
   const originalSocials = document.getElementById("original-socials");
@@ -17,7 +18,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let gridContainer = document.getElementById("background-grid");
   const contactButtons = document.querySelectorAll(".contact-btn");
   const contactBoxWrapper = document.getElementById("contact-box-wrapper");
+  const footerLineContainer = document.getElementById("footer-line-container");
+  const footerLineSvg = document.getElementById("footer-line");
+  const footerLinePath = document.getElementById("footer-line-path");
   const themeToggleCheckbox = document.getElementById("theme-checkbox");
+  const utilityControls = document.getElementById("utility-controls");
+  const drawControl = document.getElementById("draw-control");
+  const drawTrigger = document.getElementById("draw-trigger");
+  const drawMenu = document.getElementById("draw-menu");
+  const drawModeToggle = document.getElementById("draw-mode-toggle");
+  const drawTrailToggle = document.getElementById("draw-trail-toggle");
+  const drawColourButtons = Array.from(
+    document.querySelectorAll(".draw-colour")
+  );
   const initialisingContainer = document.getElementById(
     "initialising-container"
   );
@@ -27,6 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let timelineItems = [];
   let timelineYears = [];
   let timelineContents = [];
+  let timelineProgressEl = null;
+  let timelineProgressCurrent = 0;
+  let timelineProgressTarget = 0;
+  let timelineProgressRaf = null;
+  let footerLineCleanup = null;
 
   // State
   let isAnimating = false;
@@ -34,6 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let introTypingComplete = false;
   let animationSkipped = false;
   let nameToggleRunning = false;
+  let drawEnabled = false;
+  let drawMenuOpen = false;
+  let drawColourKey = "amber";
+  let drawTrailEnabled = true;
   const isTouchDevice =
     "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const reduceMotion = window.matchMedia(
@@ -153,11 +175,238 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentObserver;
   let timelineItemObserver;
-  let yearObserver;
+
+  function setupFooterElasticLine() {
+    footerLineCleanup?.();
+    footerLineCleanup = null;
+
+    if (!footerLineContainer || !footerLinePath || !footerLineSvg) return;
+
+    let width = 0;
+    let height = 0;
+    const rest = { x: 0, y: 0 };
+    const control = { x: 0, y: 0 };
+    const target = { x: 0, y: 0 };
+    const velocity = { x: 0, y: 0 };
+    const grabThresholdRatio = 0.35;
+    const releaseMultiplier = 1.35;
+    const spring = 0.12;
+    const damping = 0.78;
+    const baseTarget = { x: 0, y: 0 };
+    const scrollScale = 0.16;
+    const scrollDecay = 0.88;
+    const pointerScrollDecay = 0.92;
+    let maxStretch = 0;
+    let scrollStretch = 0;
+    let footerActive = false;
+    let pointerActive = false;
+    let animationFrame = null;
+
+    const setDimensions = () => {
+      const rect = footerLineContainer.getBoundingClientRect();
+      width = Math.max(rect.width, 1);
+      height = Math.max(rect.height, 1);
+      rest.x = width / 2;
+      rest.y = height / 2;
+      maxStretch = height * 0.4;
+      scrollStretch = clamp(scrollStretch, 0, maxStretch);
+      if (!pointerActive) {
+        baseTarget.x = rest.x;
+        baseTarget.y = rest.y;
+        target.x = rest.x;
+        target.y = rest.y;
+        control.x = rest.x;
+        control.y = rest.y;
+      }
+      footerLineSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      drawPath();
+    };
+
+    const drawPath = () => {
+      const baseline = height / 2;
+      const ctrlY = clamp(control.y, 0, height);
+      const ctrlX = clamp(control.x, 0, width);
+      footerLinePath.setAttribute(
+        "d",
+        `M0 ${baseline} Q ${ctrlX} ${ctrlY} ${width} ${baseline}`
+      );
+    };
+
+    const stopAnimation = () => {
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+    };
+
+    const animate = () => {
+      animationFrame = requestAnimationFrame(animate);
+      const baseX = pointerActive ? clamp(baseTarget.x, 0, width) : rest.x;
+      const baseY = pointerActive ? clamp(baseTarget.y, 0, height) : rest.y;
+      scrollStretch *= pointerActive ? pointerScrollDecay : scrollDecay;
+      if (scrollStretch < 0.4) scrollStretch = 0;
+      const desiredX = baseX;
+      const desiredY = clamp(baseY + scrollStretch, 0, height);
+      target.x = desiredX;
+      target.y = desiredY;
+      const toX = target.x - control.x;
+      const toY = target.y - control.y;
+      velocity.x = (velocity.x + toX * spring) * damping;
+      velocity.y = (velocity.y + toY * spring) * damping;
+      control.x += velocity.x;
+      control.y += velocity.y;
+      if (
+        !pointerActive &&
+        scrollStretch === 0 &&
+        Math.abs(toX) < 0.15 &&
+        Math.abs(toY) < 0.15
+      ) {
+        control.x = rest.x;
+        control.y = rest.y;
+      }
+      drawPath();
+    };
+
+    const pointerToTarget = (pointer) => {
+      const rect = footerLineContainer.getBoundingClientRect();
+      const x = clamp(pointer.clientX - rect.left, 0, width);
+      const y = clamp(pointer.clientY - rect.top, 0, height);
+      const dx = x - rest.x;
+      const dy = y - rest.y;
+      const distance = Math.hypot(dx, dy);
+      const grabThreshold = width * grabThresholdRatio;
+      if (distance <= grabThreshold) {
+        pointerActive = true;
+        baseTarget.x = x;
+        baseTarget.y = y;
+        target.x = x;
+        target.y = y;
+        return;
+      }
+      if (distance >= grabThreshold * releaseMultiplier) {
+        pointerActive = false;
+        baseTarget.x = rest.x;
+        baseTarget.y = rest.y;
+        target.x = rest.x;
+        target.y = rest.y;
+      }
+    };
+
+    const handlePointerMove = (event) => {
+      if (reduceMotion) return;
+      pointerToTarget(event);
+    };
+
+    const handlePointerLeave = () => {
+      pointerActive = false;
+      baseTarget.x = rest.x;
+      baseTarget.y = rest.y;
+      target.x = rest.x;
+      target.y = rest.y;
+    };
+
+    const handleWheel = (event) => {
+      if (!footerActive || reduceMotion) return;
+      if (event.deltaY === 0) return;
+      const doc = document.documentElement;
+      const bottomReached =
+        window.innerHeight + window.scrollY >= doc.scrollHeight - 1;
+      if (!bottomReached) return;
+      scrollStretch = clamp(
+        scrollStretch + event.deltaY * scrollScale,
+        0,
+        maxStretch
+      );
+    };
+
+    const resizeObserver = new ResizeObserver(setDimensions);
+    resizeObserver.observe(footerLineContainer);
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            footerActive = true;
+            footerLineContainer.classList.add("is-active");
+            baseTarget.x = rest.x;
+            baseTarget.y = rest.y;
+            target.x = rest.x;
+            target.y = rest.y;
+            if (!reduceMotion && animationFrame === null) {
+              animate();
+            } else if (reduceMotion) {
+              control.x = rest.x;
+              control.y = rest.y;
+              drawPath();
+            }
+          } else {
+            footerActive = false;
+            footerLineContainer.classList.remove("is-active");
+            pointerActive = false;
+            scrollStretch = 0;
+            baseTarget.x = rest.x;
+            baseTarget.y = rest.y;
+            target.x = rest.x;
+            target.y = rest.y;
+            control.x = rest.x;
+            control.y = rest.y;
+            drawPath();
+            stopAnimation();
+          }
+        });
+      },
+      { rootMargin: "0px 0px -12% 0px", threshold: 0 }
+    );
+    intersectionObserver.observe(footerLineContainer);
+
+    footerLineContainer.addEventListener("pointermove", handlePointerMove);
+    footerLineContainer.addEventListener("pointerleave", handlePointerLeave);
+    footerLineContainer.addEventListener("pointercancel", handlePointerLeave);
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    setDimensions();
+
+    footerLineCleanup = () => {
+      stopAnimation();
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      footerLineContainer.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+      footerLineContainer.removeEventListener(
+        "pointerleave",
+        handlePointerLeave
+      );
+      footerLineContainer.removeEventListener(
+        "pointercancel",
+        handlePointerLeave
+      );
+      window.removeEventListener("wheel", handleWheel);
+      footerActive = false;
+      pointerActive = false;
+      scrollStretch = 0;
+    };
+  }
 
   function populateTimeline() {
     if (!timelineRoot) return;
-    timelineRoot.innerHTML = '<div class="timeline-line" aria-hidden="true"></div>';
+    timelineRoot.innerHTML = "";
+
+    const lineContainer = document.createElement("div");
+    lineContainer.className = "timeline-line-container";
+    timelineProgressEl = document.createElement("div");
+    timelineProgressEl.id = "timeline-progress";
+    timelineProgressEl.className = "timeline-line-progress";
+    lineContainer.appendChild(timelineProgressEl);
+    timelineRoot.appendChild(lineContainer);
+    if (timelineProgressRaf) {
+      cancelAnimationFrame(timelineProgressRaf);
+      timelineProgressRaf = null;
+    }
+    timelineProgressCurrent = 0;
+    timelineProgressTarget = 0;
+    timelineProgressEl.style.transform = "scaleY(0)";
 
     const frag = document.createDocumentFragment();
     let itemIndex = 0;
@@ -169,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
       frag.appendChild(yearEl);
 
       entries.forEach((entry) => {
-        const side = itemIndex % 2 === 0 ? "left" : "right";
+        const side = itemIndex % 2 === 0 ? "timeline-left" : "timeline-right";
         const itemEl = document.createElement("article");
         itemEl.className = `timeline-item ${side}`;
         itemEl.dataset.month = `${entry.month}`;
@@ -205,26 +454,83 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateTimelineFill() {
-    if (!timelineRoot || !timelineItems.length) return;
+    if (!timelineRoot || !timelineItems.length || !timelineProgressEl) return;
     const rect = timelineRoot.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const distanceInto = viewportHeight - rect.top;
-    const range = rect.height + viewportHeight;
-    const progressScroll = range > 0 ? clamp(distanceInto / range, 0, 1) : 0;
-    const visibleCount = timelineItems.filter((item) =>
-      item.classList.contains("is-visible")
-    ).length;
-    const progressSeen = timelineItems.length
-      ? clamp(visibleCount / timelineItems.length, 0, 1)
-      : 0;
-    const progress = Math.max(progressSeen, progressScroll);
-    timelineRoot.style.setProperty("--line-fill", `${(progress * 100).toFixed(2)}%`);
+    const viewportCenter = window.innerHeight / 2;
+    
+    // Calculate how far the viewport center has progressed through the timeline
+    const timelineStart = rect.top;
+    const timelineHeight = rect.height;
+    
+    // Progress from 0 to 1 as viewport center moves from timeline top to bottom
+    const progress = clamp((viewportCenter - timelineStart) / timelineHeight, 0, 1);
+    
+    setTimelineProgress(progress);
+    
+    // Update year boxes based on timeline progress line position
+    updateYearHighlighting(progress);
+  }
+  
+  function updateYearHighlighting(progress) {
+    if (!timelineRoot || !timelineYears.length) return;
+    const timelineRect = timelineRoot.getBoundingClientRect();
+    const timelineHeight = timelineRect.height;
+    
+    timelineYears.forEach((year) => {
+      const yearRect = year.getBoundingClientRect();
+      const yearTopRelative = yearRect.top - timelineRect.top;
+      const yearProgressThreshold = yearTopRelative / timelineHeight;
+      
+      if (progress >= yearProgressThreshold) {
+        year.classList.add("is-passed");
+      } else {
+        year.classList.remove("is-passed");
+      }
+    });
+  }
+
+  function setTimelineProgress(value) {
+    if (!timelineProgressEl) return;
+    const nextValue = clamp(value, 0, 1);
+    if (reduceMotion) {
+      if (timelineProgressRaf) {
+        cancelAnimationFrame(timelineProgressRaf);
+        timelineProgressRaf = null;
+      }
+      timelineProgressCurrent = nextValue;
+      timelineProgressTarget = nextValue;
+      timelineProgressEl.style.transform = `scaleY(${timelineProgressCurrent})`;
+      return;
+    }
+
+    timelineProgressTarget = nextValue;
+    if (!timelineProgressRaf) {
+      timelineProgressRaf = requestAnimationFrame(renderTimelineProgress);
+    }
+  }
+
+  function renderTimelineProgress() {
+    if (!timelineProgressEl) {
+      timelineProgressRaf = null;
+      return;
+    }
+
+    const diff = timelineProgressTarget - timelineProgressCurrent;
+    if (Math.abs(diff) < 0.002) {
+      timelineProgressCurrent = timelineProgressTarget;
+      timelineProgressEl.style.transform = `scaleY(${timelineProgressCurrent})`;
+      timelineProgressRaf = null;
+      return;
+    }
+
+    timelineProgressCurrent += diff * 0.15;
+    timelineProgressEl.style.transform = `scaleY(${timelineProgressCurrent})`;
+    timelineProgressRaf = requestAnimationFrame(renderTimelineProgress);
   }
 
   function setupTimelineObservers() {
     if (currentObserver) currentObserver.disconnect();
     if (timelineItemObserver) timelineItemObserver.disconnect();
-    if (yearObserver) yearObserver.disconnect();
 
     if (reduceMotion) {
       timelineItems.forEach((item) => item.classList.add("is-visible"));
@@ -238,6 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
               entry.target.classList.add("is-visible");
               updateTimelineFill();
+              debouncedAlignContent();
               if (timelineItemObserver) timelineItemObserver.unobserve(entry.target);
             }, Math.max(delay, 0));
           });
@@ -273,20 +580,6 @@ document.addEventListener("DOMContentLoaded", () => {
       { root: null, rootMargin: "-40% 0px -40% 0px", threshold: [0.25, 0.5, 0.75] }
     );
     timelineContents.forEach((el) => currentObserver.observe(el));
-
-    yearObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const rect = entry.boundingClientRect;
-          const viewportCenter = window.innerHeight / 2;
-          if (rect.top < viewportCenter && rect.bottom > 0)
-            entry.target.classList.add("is-passed");
-          else entry.target.classList.remove("is-passed");
-        });
-      },
-      { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
-    );
-    timelineYears.forEach((year) => yearObserver.observe(year));
 
     updateTimelineFill();
   }
@@ -554,6 +847,7 @@ document.addEventListener("DOMContentLoaded", () => {
         terminalBox.classList.add("docked");
         const introContainer = terminalBox.querySelector("#intro-container");
         if (introContainer) introContainer.style.padding = "0";
+      document.body.classList.add("draw-ready");
         startNameToggleAnimation();
       }
     }
@@ -580,29 +874,100 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* Background grid + pixel trail */
-  const gridSize = 40;
+  const readGridUnit = () => {
+    const value = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--grid-unit")
+    );
+    return Number.isFinite(value) && value > 0 ? value : 40;
+  };
+  let gridUnit = readGridUnit();
   let cells = [];
   let numCols, numRows;
+  const lockedCells = new Set();
+  const DRAW_ACTION = {
+    LOCK: "lock",
+    UNLOCK: "unlock",
+  };
+  const DRAW_COLOURS = {
+    amber: {
+      key: "amber",
+      name: "Amber",
+      strong: "#fbbf24",
+      fill: "rgba(251, 191, 36, 0.14)",
+      border: "rgba(217, 119, 6, 0.7)",
+      trail: "rgba(251, 191, 36, 0.12)",
+    },
+    sky: {
+      key: "sky",
+      name: "Sky",
+      strong: "#38bdf8",
+      fill: "rgba(56, 189, 248, 0.16)",
+      border: "rgba(14, 165, 233, 0.7)",
+      trail: "rgba(56, 189, 248, 0.12)",
+    },
+    violet: {
+      key: "violet",
+      name: "Violet",
+      strong: "#a855f7",
+      fill: "rgba(168, 85, 247, 0.18)",
+      border: "rgba(126, 34, 206, 0.7)",
+      trail: "rgba(168, 85, 247, 0.14)",
+    },
+    lime: {
+      key: "lime",
+      name: "Lime",
+      strong: "#a3e635",
+      fill: "rgba(163, 230, 53, 0.2)",
+      border: "rgba(132, 204, 22, 0.7)",
+      trail: "rgba(163, 230, 53, 0.16)",
+    },
+  };
+  const gridAlignmentTargets = [
+    { selector: "#page-content-wrapper > .max-w-4xl", reference: "left" },
+    { selector: "#projects-container", reference: "right" },
+    { selector: "#experience-container", reference: "center" },
+    { selector: "#timeline-component", reference: "center" },
+    { selector: ".library-grid", reference: "center" },
+    { selector: "#footer-line-container", reference: "center" },
+  ];
+  let drawingMode = null;
+
+  const getCellKey = (row, col) => `${row}:${col}`;
   function createGrid() {
+    if (!gridContainer) return;
+    gridUnit = readGridUnit();
     gridContainer.innerHTML = "";
     cells = [];
-    numCols = Math.floor(window.innerWidth / gridSize);
-    numRows = Math.floor(window.innerHeight / gridSize);
-    gridContainer.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
-    for (let i = 0; i < numCols * numRows; i++) {
+    numCols = Math.max(1, Math.ceil(window.innerWidth / gridUnit));
+    numRows = Math.max(1, Math.ceil(window.innerHeight / gridUnit));
+    gridContainer.style.gridTemplateColumns = `repeat(${numCols}, ${gridUnit}px)`;
+    gridContainer.style.gridTemplateRows = `repeat(${numRows}, ${gridUnit}px)`;
+    const validKeys = new Set();
+    const total = numCols * numRows;
+    for (let i = 0; i < total; i++) {
+      const row = Math.floor(i / numCols);
+      const col = i % numCols;
+      const key = getCellKey(row, col);
+      validKeys.add(key);
       const cell = document.createElement("div");
       cell.classList.add("grid-cell");
-      cell.dataset.row = Math.floor(i / numCols);
-      cell.dataset.col = i % numCols;
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.dataset.key = key;
+      if (lockedCells.has(key)) cell.classList.add("grid-cell--locked");
       gridContainer.appendChild(cell);
       cells.push(cell);
     }
+    lockedCells.forEach((key) => {
+      if (!validKeys.has(key)) lockedCells.delete(key);
+    });
   }
   function handlePixelTrail(e) {
     if (isTouchDevice) return;
-    if (reduceMotion) return;
-    const col = Math.floor(e.clientX / gridSize);
-    const row = Math.floor(e.clientY / gridSize);
+    if (reduceMotion || !drawTrailEnabled) return;
+    const unit = gridUnit || readGridUnit();
+    const col = Math.floor(e.clientX / unit);
+    const row = Math.floor(e.clientY / unit);
     const index = row * numCols + col;
     if (index >= 0 && index < cells.length) {
       const cell = cells[index];
@@ -610,6 +975,259 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.classList.add("pixel-trail-active");
         setTimeout(() => cell.classList.remove("pixel-trail-active"), 2500);
       }
+    }
+  }
+
+  const interactiveSelector =
+    "a, button, input, textarea, select, summary, label, [role='button'], [role='link'], [data-prevent-draw], video, audio, #modal-overlay, #modal-content, #side-nav, #terminal-box, #sticky-header, .collapsible-heading, .timeline-content, .experience-item, .project-box, .side-nav-item, .social-link, .theme-switch, .draw-control, .draw-trigger, #draw-menu";
+
+  function getCellFromEvent(event) {
+    if (!cells.length) return null;
+    const unit = gridUnit || readGridUnit();
+    const col = Math.floor(event.clientX / unit);
+    const row = Math.floor(event.clientY / unit);
+    if (col < 0 || row < 0) return null;
+    if (col >= numCols || row >= numRows) return null;
+    const index = row * numCols + col;
+    return cells[index] || null;
+  }
+
+  function lockCell(cell) {
+    if (!cell) return;
+    const key = cell.dataset.key;
+    if (!key) return;
+    cell.classList.add("grid-cell--locked");
+    lockedCells.add(key);
+    updateClearButtonVisibility();
+  }
+
+  function unlockCell(cell) {
+    if (!cell) return;
+    const key = cell.dataset.key;
+    if (!key) return;
+    cell.classList.remove("grid-cell--locked");
+    lockedCells.delete(key);
+    updateClearButtonVisibility();
+  }
+
+  function updateClearButtonVisibility() {
+    if (!clearGridBtn) return;
+    if (lockedCells.size > 0) {
+      clearGridBtn.style.opacity = "1";
+      clearGridBtn.style.pointerEvents = "auto";
+    } else {
+      clearGridBtn.style.opacity = "0";
+      clearGridBtn.style.pointerEvents = "none";
+    }
+  }
+
+  function alignContentToGrid() {
+    gridUnit = readGridUnit();
+    const unit = gridUnit;
+    const epsilon = 0.5;
+    const normalize = (value) => {
+      const remainder = value % unit;
+      return remainder < 0 ? remainder + unit : remainder;
+    };
+
+    gridAlignmentTargets.forEach(({ selector, reference = "left" }) => {
+      document.querySelectorAll(selector).forEach((element) => {
+        if (!element) return;
+
+        element.classList.add("grid-aligned");
+        element.style.setProperty("--grid-align-start", "0px");
+        element.style.setProperty("--grid-align-end", "0px");
+        element.style.setProperty("--grid-align-translate", "0px");
+
+        const rect = element.getBoundingClientRect();
+        if (!rect.width) return;
+
+        if (reference === "center") {
+          if (window.innerWidth <= 768) return;
+          const center = rect.left + rect.width / 2;
+          const remainder = normalize(center);
+          let adjustment = 0;
+          if (remainder > epsilon && Math.abs(unit - remainder) > epsilon) {
+            adjustment = remainder <= unit / 2 ? -remainder : unit - remainder;
+          }
+          if (Math.abs(adjustment) > epsilon) {
+            element.style.setProperty("--grid-align-translate", `${adjustment}px`);
+          }
+        } else if (reference === "right") {
+          const remainder = normalize(rect.right);
+          const padding = unit - remainder;
+          if (remainder > epsilon && padding > epsilon && padding < unit - epsilon) {
+            element.style.setProperty("--grid-align-end", `${padding}px`);
+          }
+        } else if (reference === "left") {
+          if (window.innerWidth <= 768) return;
+          const remainder = normalize(rect.left);
+          let adjustment = 0;
+          if (remainder > epsilon && Math.abs(unit - remainder) > epsilon) {
+            adjustment = remainder <= unit / 2 ? -remainder : unit - remainder;
+          }
+          if (Math.abs(adjustment) > epsilon) {
+            element.style.setProperty("--grid-align-translate", `${adjustment}px`);
+          }
+        }
+      });
+    });
+  }
+
+  function clearAllLockedCells() {
+    cells.forEach(cell => {
+      cell.classList.remove("grid-cell--locked");
+    });
+    lockedCells.clear();
+    updateClearButtonVisibility();
+  }
+
+  function shouldIgnorePointer(event) {
+    const target = event.target;
+    if (!target) return true;
+    if (modalOverlay?.classList.contains("visible") && modalOverlay.contains(target)) {
+      return true;
+    }
+    return Boolean(target.closest(interactiveSelector));
+  }
+
+  function handleGridPointerDown(event) {
+    if (event.pointerType === "touch") return;
+    if (typeof event.button === "number" && event.button !== 0) return;
+    if (!gridContainer || shouldIgnorePointer(event)) return;
+    if (!drawEnabled) return;
+    const cell = getCellFromEvent(event);
+    if (!cell) return;
+    const isLocked = cell.classList.contains("grid-cell--locked");
+    drawingMode = isLocked ? DRAW_ACTION.UNLOCK : DRAW_ACTION.LOCK;
+    if (drawingMode === DRAW_ACTION.LOCK) lockCell(cell);
+    else unlockCell(cell);
+  }
+
+  function handleGridPointerMove(event) {
+    if (!drawingMode) return;
+    if (event.pointerType === "touch") return;
+    if (!drawEnabled) return;
+    const cell = getCellFromEvent(event);
+    if (!cell) return;
+    const isLocked = cell.classList.contains("grid-cell--locked");
+    if (drawingMode === DRAW_ACTION.LOCK && !isLocked) {
+      lockCell(cell);
+    } else if (drawingMode === DRAW_ACTION.UNLOCK && isLocked) {
+      unlockCell(cell);
+    }
+  }
+
+  function resetDrawingState() {
+    drawingMode = null;
+  }
+
+  function applyDrawColour(key, { save = true } = {}) {
+    const colour = DRAW_COLOURS[key] || DRAW_COLOURS.amber;
+    drawColourKey = colour.key;
+    document.documentElement.style.setProperty(
+      "--draw-color-strong",
+      colour.strong
+    );
+    document.documentElement.style.setProperty("--draw-fill", colour.fill);
+    document.documentElement.style.setProperty("--draw-border", colour.border);
+    document.documentElement.style.setProperty("--draw-trail", colour.trail);
+    drawColourButtons.forEach((btn) => {
+      const isSelected = btn.dataset.colour === colour.key;
+      btn.setAttribute("aria-checked", String(isSelected));
+      btn.classList.toggle("is-selected", isSelected);
+    });
+    if (save) {
+      try {
+        localStorage.setItem("drawColour", colour.key);
+      } catch {}
+    }
+  }
+
+  function setDrawEnabled(value, { save = true } = {}) {
+    drawEnabled = Boolean(value);
+    document.body.classList.toggle("draw-enabled", drawEnabled);
+    if (
+      drawEnabled &&
+      (isDocked || terminalBox?.classList.contains("docked"))
+    ) {
+      document.body.classList.add("draw-ready");
+    }
+    if (drawModeToggle) {
+      drawModeToggle.setAttribute("aria-checked", String(drawEnabled));
+      drawModeToggle.classList.toggle("is-active", drawEnabled);
+    }
+    if (drawTrigger) {
+      drawTrigger.setAttribute("aria-pressed", String(drawEnabled));
+    }
+    if (drawControl) drawControl.classList.toggle("is-active", drawEnabled);
+    if (!drawEnabled) resetDrawingState();
+    if (save) {
+      try {
+        localStorage.setItem("drawModeEnabled", String(drawEnabled));
+      } catch {}
+    }
+  }
+
+  function clearPixelTrailActivity() {
+    if (!cells.length) return;
+    cells.forEach((cell) => cell.classList.remove("pixel-trail-active"));
+  }
+
+  function setDrawTrailEnabled(value, { save = true } = {}) {
+    drawTrailEnabled = Boolean(value);
+    if (drawTrailToggle) {
+      drawTrailToggle.setAttribute("aria-checked", String(drawTrailEnabled));
+      drawTrailToggle.classList.toggle("is-active", drawTrailEnabled);
+    }
+    document.body.classList.toggle("draw-trail-disabled", !drawTrailEnabled);
+    if (!drawTrailEnabled) clearPixelTrailActivity();
+    if (save) {
+      try {
+        localStorage.setItem("drawTrailEnabled", String(drawTrailEnabled));
+      } catch {}
+    }
+  }
+
+  function openDrawMenu() {
+    if (!drawControl || !drawMenu) return;
+    drawMenuOpen = true;
+    drawControl.classList.add("open");
+    drawMenu.setAttribute("aria-hidden", "false");
+    drawTrigger?.setAttribute("aria-expanded", "true");
+    if (drawModeToggle) {
+      requestAnimationFrame(() => {
+        drawModeToggle.focus({ preventScroll: true });
+      });
+    }
+  }
+
+  function closeDrawMenu({ focusTrigger = false } = {}) {
+    if (!drawControl || !drawMenu) return;
+    drawMenuOpen = false;
+    drawControl.classList.remove("open");
+    drawMenu.setAttribute("aria-hidden", "true");
+    drawTrigger?.setAttribute("aria-expanded", "false");
+    if (focusTrigger) {
+      drawTrigger?.focus({ preventScroll: true });
+    }
+  }
+
+  function toggleDrawMenu() {
+    if (drawMenuOpen) closeDrawMenu({ focusTrigger: false });
+    else openDrawMenu();
+  }
+
+  function handleGlobalPointerDown(event) {
+    if (!drawMenuOpen) return;
+    if (!drawControl?.contains(event.target)) {
+      closeDrawMenu();
+    }
+  }
+
+  function handleGlobalKeydown(event) {
+    if (event.key === "Escape" && drawMenuOpen) {
+      closeDrawMenu({ focusTrigger: true });
     }
   }
 
@@ -645,22 +1263,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const debouncedAlignContent = debounce(alignContentToGrid, 100);
+
   const debouncedTimelineMetrics = debounce(() => {
     positionTimelineMarkers();
     updateTimelineFill();
+    debouncedAlignContent();
   }, 150);
 
   // Theme
   function applyTheme(theme) {
     document.documentElement.classList.toggle("light", theme === "light");
-    themeToggleCheckbox.checked = theme === "light";
+    if (themeToggleCheckbox) {
+      themeToggleCheckbox.checked = theme === "light";
+    }
   }
-  themeToggleCheckbox.addEventListener("change", () => {
+
+  themeToggleCheckbox?.addEventListener("change", () => {
     const newTheme = themeToggleCheckbox.checked ? "light" : "dark";
     try {
       localStorage.setItem("theme", newTheme);
     } catch {}
     applyTheme(newTheme);
+    gridUnit = readGridUnit();
+    createGrid();
+    alignContentToGrid();
   });
 
   // Modal (focus trap + ESC)
@@ -786,6 +1413,9 @@ document.addEventListener("DOMContentLoaded", () => {
           updatePassed();
         }, 120);
       }
+      setTimeout(() => {
+        debouncedAlignContent();
+      }, 160);
     };
     heading.addEventListener("click", toggle);
     heading.addEventListener("keydown", (e) => {
@@ -796,21 +1426,93 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Tabs
-  function setupTabs() {
-    const containers = document.querySelectorAll(".tabs-container");
-    containers.forEach((container) => {
-      const btns = container.querySelectorAll(".tab-btn");
-      const tabs = container.querySelectorAll(".tab-content");
-      btns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.tab;
-          btns.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          tabs.forEach((t) => t.classList.toggle("active", t.id === id));
-        });
+  // Library capsule tabs
+  function setupLibraryTabs() {
+    const capsule = document.querySelector("#library-section .t-capsule");
+    if (!capsule) return;
+
+    const tabs = Array.from(capsule.querySelectorAll('[role="tab"]'));
+    if (!tabs.length) return;
+    const panels = tabs.map((tab) => {
+      const id = tab.getAttribute("aria-controls");
+      return id ? document.getElementById(id) : null;
+    });
+    const thumb = capsule.querySelector(".thumb");
+
+    let activeIndex = tabs.findIndex(
+      (tab) => tab.getAttribute("aria-selected") === "true"
+    );
+    if (activeIndex < 0) activeIndex = 0;
+
+    const moveThumb = (index) => {
+      if (!thumb || !tabs[index]) return;
+      const tabRect = tabs[index].getBoundingClientRect();
+      const capsuleRect = capsule.getBoundingClientRect();
+      thumb.style.left = `${tabRect.left - capsuleRect.left}px`;
+      thumb.style.width = `${tabRect.width}px`;
+    };
+
+    const activate = (index, { focus = false } = {}) => {
+      const total = tabs.length;
+      if (!total) return;
+      const nextIndex = (index + total) % total;
+      activeIndex = nextIndex;
+
+      tabs.forEach((tab, idx) => {
+        const isActive = idx === nextIndex;
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
+        if (isActive && focus) {
+          tab.focus({ preventScroll: true });
+        }
+      });
+
+      panels.forEach((panel, idx) => {
+        if (!panel) return;
+        const isShown = idx === nextIndex;
+        panel.toggleAttribute("hidden", !isShown);
+        panel.setAttribute("aria-hidden", isShown ? "false" : "true");
+      });
+
+      moveThumb(nextIndex);
+      debouncedAlignContent();
+    };
+
+    tabs.forEach((tab, idx) => {
+      tab.addEventListener("click", () => activate(idx));
+      tab.addEventListener("keydown", (event) => {
+        switch (event.key) {
+          case "ArrowRight":
+            event.preventDefault();
+            activate(idx + 1, { focus: true });
+            break;
+          case "ArrowLeft":
+            event.preventDefault();
+            activate(idx - 1, { focus: true });
+            break;
+          case "Home":
+            event.preventDefault();
+            activate(0, { focus: true });
+            break;
+          case "End":
+            event.preventDefault();
+            activate(tabs.length - 1, { focus: true });
+            break;
+          case "Enter":
+          case " ":
+            event.preventDefault();
+            activate(idx, { focus: true });
+            break;
+          default:
+            break;
+        }
       });
     });
+
+    const handleResize = () => moveThumb(activeIndex);
+    window.addEventListener("resize", handleResize);
+
+    activate(activeIndex);
+    requestAnimationFrame(() => moveThumb(activeIndex));
   }
 
   // Init
@@ -835,6 +1537,29 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePassed();
     updateTimelineFill();
 
+
+    try {
+      const storedColour = localStorage.getItem("drawColour");
+      if (storedColour && DRAW_COLOURS[storedColour]) {
+        applyDrawColour(storedColour, { save: false });
+      } else {
+        applyDrawColour(drawColourKey, { save: false });
+      }
+      const storedDrawEnabled = localStorage.getItem("drawModeEnabled");
+      if (storedDrawEnabled === "true") {
+        setDrawEnabled(true, { save: false });
+      }
+      const storedTrailEnabled = localStorage.getItem("drawTrailEnabled");
+      if (storedTrailEnabled === "false") {
+        setDrawTrailEnabled(false, { save: false });
+      } else {
+        setDrawTrailEnabled(true, { save: false });
+      }
+    } catch {
+      applyDrawColour(drawColourKey, { save: false });
+      setDrawTrailEnabled(true, { save: false });
+    }
+
     if (isTouchDevice) {
       skipNote.textContent = "Tap to skip";
       document.addEventListener("touchstart", handleSkipKey, {
@@ -845,6 +1570,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.addEventListener("keydown", handleSkipKey, { once: true });
     }
     skipBtn?.addEventListener("click", skipAnimation);
+    clearGridBtn?.addEventListener("click", clearAllLockedCells);
 
     window.addEventListener(
       "scroll",
@@ -866,9 +1592,17 @@ document.addEventListener("DOMContentLoaded", () => {
     updateClock();
     createGrid();
     document.addEventListener("mousemove", handlePixelTrail);
+    document.addEventListener("pointerdown", handleGridPointerDown);
+    window.addEventListener("pointermove", handleGridPointerMove, {
+      passive: false,
+    });
+    window.addEventListener("pointerup", resetDrawingState);
+    window.addEventListener("pointercancel", resetDrawingState);
+    window.addEventListener("blur", resetDrawingState);
     const debouncedCreateGrid = debounce(createGrid, 100);
     window.addEventListener("resize", debouncedCreateGrid);
     window.addEventListener("resize", debouncedTimelineMetrics);
+    window.addEventListener("resize", debouncedAlignContent);
 
     // Contact buttons: scroll to footer instead of toggling contact box
     const footer = document.getElementById("footer-section");
@@ -885,16 +1619,54 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    setupFooterElasticLine();
+
     setupCollapsible("done-heading");
     setupCollapsible("experience-heading");
     setupCollapsible("timeline-heading");
     setupCollapsible("library-heading");
-    setupTabs();
+    setupLibraryTabs();
     positionTimelineMarkers();
     updatePassed();
+    alignContentToGrid();
+
+    if (drawTrigger) {
+      drawTrigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleDrawMenu();
+      });
+    }
+
+    if (drawModeToggle) {
+      drawModeToggle.addEventListener("click", () => {
+        setDrawEnabled(!drawEnabled);
+      });
+    }
+    if (drawTrailToggle) {
+      drawTrailToggle.addEventListener("click", () => {
+        setDrawTrailEnabled(!drawTrailEnabled);
+      });
+    }
+
+    drawColourButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.colour;
+        if (!key || key === drawColourKey) return;
+        applyDrawColour(key);
+      });
+    });
+
+    document.addEventListener("pointerdown", handleGlobalPointerDown);
+    document.addEventListener("keydown", handleGlobalKeydown);
   }
 
   initialize();
+
+  if (drawControl && terminalBox.classList.contains("docked")) {
+    document.body.classList.add("draw-ready");
+  }
+
+  handleScroll();
 
   /* ===== Side Nav Setup (integrated handle, left dots, auto-collapse) ===== */
   (function setupSideNavV2() {
@@ -1019,7 +1791,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Disconnect observers on unload
   window.addEventListener("beforeunload", () => {
     if (timelineItemObserver) timelineItemObserver.disconnect();
-    if (yearObserver) yearObserver.disconnect();
     if (currentObserver) currentObserver.disconnect();
+    footerLineCleanup?.();
+    resetDrawingState();
   });
 });

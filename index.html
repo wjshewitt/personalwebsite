@@ -54,16 +54,99 @@
       >Skip to content</a
     >
 
-    <!-- Theme switch -->
-    <div class="theme-switch-wrapper">
-      <label
-        class="theme-switch"
-        for="theme-checkbox"
-        aria-label="Toggle theme"
-      >
-        <input type="checkbox" id="theme-checkbox" />
-        <div class="slider round"></div>
-      </label>
+    <!-- Theme + draw controls -->
+    <div class="utility-controls" id="utility-controls">
+      <div class="theme-switch-wrapper">
+        <label
+          class="theme-switch"
+          for="theme-checkbox"
+          aria-label="Toggle theme"
+        >
+          <input type="checkbox" id="theme-checkbox" />
+          <div class="slider round"></div>
+        </label>
+      </div>
+
+      <div class="draw-control" id="draw-control">
+        <button
+          id="draw-trigger"
+          class="draw-trigger"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="draw-menu"
+          aria-pressed="false"
+        >
+          <span class="draw-trigger-icon" aria-hidden="true">
+            <span class="draw-icon draw-icon--square"></span>
+            <span class="draw-icon draw-icon--circle"></span>
+            <span class="draw-icon draw-icon--triangle"></span>
+          </span>
+          <span class="draw-trigger-label">Draw</span>
+          <svg
+            class="draw-trigger-caret"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            aria-hidden="true"
+          >
+            <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="draw-menu" id="draw-menu" role="menu" aria-hidden="true">
+          <div class="draw-menu-section">
+            <button
+              id="draw-mode-toggle"
+              class="draw-menu-toggle"
+              type="button"
+              role="menuitemcheckbox"
+              aria-checked="false"
+            >
+              <span class="draw-menu-toggle-indicator" aria-hidden="true"></span>
+              Enable drawing
+            </button>
+            <button
+              id="draw-trail-toggle"
+              class="draw-menu-toggle"
+              type="button"
+              role="menuitemcheckbox"
+              aria-checked="true"
+            >
+              <span class="draw-menu-toggle-indicator" aria-hidden="true"></span>
+              Trail effect
+            </button>
+          </div>
+          <div class="draw-menu-section" role="radiogroup" aria-label="Draw colour">
+            <p class="draw-menu-heading">Colour</p>
+            <ul class="draw-menu-options">
+              <li>
+                <button class="draw-colour" type="button" role="menuitemradio" data-colour="amber" aria-checked="false">
+                  <span class="draw-colour-swatch" style="--colour:#fbbf24"></span>
+                  Amber
+                </button>
+              </li>
+              <li>
+                <button class="draw-colour" type="button" role="menuitemradio" data-colour="sky" aria-checked="false">
+                  <span class="draw-colour-swatch" style="--colour:#38bdf8"></span>
+                  Sky
+                </button>
+              </li>
+              <li>
+                <button class="draw-colour" type="button" role="menuitemradio" data-colour="violet" aria-checked="false">
+                  <span class="draw-colour-swatch" style="--colour:#a855f7"></span>
+                  Violet
+                </button>
+              </li>
+              <li>
+                <button class="draw-colour" type="button" role="menuitemradio" data-colour="lime" aria-checked="false">
+                  <span class="draw-colour-swatch" style="--colour:#a3e635"></span>
+                  Lime
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Background grid -->
@@ -80,6 +163,15 @@
       type="button"
     >
       Skip intro
+    </button>
+
+    <!-- Clear Grid button -->
+    <button
+      id="clear-grid-btn"
+      class="fixed bottom-4 right-4 font-pixel text-xs text-gray-400 hover:text-amber-400 z-50 opacity-0 pointer-events-none transition-opacity duration-500"
+      type="button"
+    >
+      Clear Grid
     </button>
 
     <!-- Terminal Intro -->
@@ -412,7 +504,7 @@
             </div>
             <div class="collapsible-content-wrapper">
               <div class="collapsible-inner-content">
-                <div class="timeline mt-12 relative">
+                <div id="timeline-component" class="timeline mt-12 relative">
                   <div class="timeline-line-container">
                     <div
                       id="timeline-progress"
@@ -464,7 +556,7 @@
                     </div>
                   </div>
 
-                  <div class="timeline-year"><span aria-label="Timeline year 2024">2024</div>
+                  <div class="timeline-year"><span aria-label="Timeline year 2024">2024</span></div>
                   <div class="timeline-item timeline-left" data-month="12">
                     <div
                       class="timeline-content"
@@ -507,7 +599,7 @@
                     </div>
                   </div>
 
-                  <div class="timeline-year"><span aria-label="Timeline year 2023">2023</div>
+                  <div class="timeline-year"><span aria-label="Timeline year 2023">2023</span></div>
                   <div class="timeline-item timeline-left" data-month="7">
                     <div
                       class="timeline-content"
@@ -529,7 +621,7 @@
                     </div>
                   </div>
 
-                  <div class="timeline-year"><span aria-label="Timeline year 2022">2022</div>
+                  <div class="timeline-year"><span aria-label="Timeline year 2022">2022</span></div>
                   <div class="timeline-item timeline-right" data-month="8">
                     <div
                       class="timeline-content"
@@ -551,7 +643,7 @@
                     </div>
                   </div>
 
-                  <div class="timeline-year"><span aria-label="Timeline year 2021">2021</div>
+                  <div class="timeline-year"><span aria-label="Timeline year 2021">2021</span></div>
                   <div class="timeline-item timeline-left" data-month="9">
                     <div
                       class="timeline-content"
@@ -682,128 +774,343 @@
             </div>
             <div class="collapsible-content-wrapper">
               <div class="collapsible-inner-content">
-                <div class="tabs-container">
-                  <div class="tab-buttons">
-                    <button class="tab-btn active" data-tab="tab-books">
+                <div class="library-tabs">
+                  <div class="t-capsule" role="tablist" aria-label="Library">
+                    <span class="thumb" aria-hidden="true"></span>
+                    <button
+                      id="lib-books"
+                      role="tab"
+                      aria-selected="true"
+                      aria-controls="lib-panel-books"
+                    >
                       Books
                     </button>
-                    <button class="tab-btn" data-tab="tab-articles">
+                    <button
+                      id="lib-articles"
+                      role="tab"
+                      aria-selected="false"
+                      aria-controls="lib-panel-articles"
+                    >
                       Articles
+                    </button>
+                    <button
+                      id="lib-tvpodcast"
+                      role="tab"
+                      aria-selected="false"
+                      aria-controls="lib-panel-tvpodcast"
+                    >
+                      TV/Podcast
                     </button>
                   </div>
 
-                  <div id="tab-books" class="tab-content active">
-                    <div class="library-grid">
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            The Housing Theory of Everything
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">
-                            Sam Bowman et al.
-                          </p>
-                          <p class="mt-3 text-gray-300">
-                            A clean synthesis of why housing constraints drag on
-                            growth.
-                          </p>
-                          <div>
-                            <span class="tag">Housing</span
-                            ><span class="tag">Policy</span>
+                  <div class="library-panels">
+                    <div
+                      id="lib-panel-books"
+                      role="tabpanel"
+                      aria-labelledby="lib-books"
+                    >
+                      <div class="library-grid">
+                        <div class="library-card library-card-adaptive is-landscape">
+                          <div class="cover">
+                            <img src="paris.png" alt="Paris 44" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Paris 44
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Patrick Bishop
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              The story of the liberation of Paris in August 1944.
+                            </p>
+                            <div>
+                              <span class="tag">History</span
+                              ><span class="tag">War</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            Where Is My Flying Car?
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">
-                            J. Storrs Hall
-                          </p>
-                          <p class="mt-3 text-gray-300">
-                            On progress, energy density, and why the future
-                            stalled.
-                          </p>
-                          <div>
-                            <span class="tag">Progress</span
-                            ><span class="tag">Tech</span>
+                        <div class="library-card library-card-adaptive is-landscape">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              The Power Broker
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">Robert Caro</p>
+                            <p class="mt-3 text-gray-300">
+                              Masterclass in power, planning, and unintended consequences.
+                            </p>
+                            <div>
+                              <span class="tag">Planning</span
+                              ><span class="tag">History</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            The Power Broker
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">Robert Caro</p>
-                          <p class="mt-3 text-gray-300">
-                            Masterclass in power, planning, and unintended
-                            consequences.
-                          </p>
-                          <div>
-                            <span class="tag">Planning</span
-                            ><span class="tag">History</span>
+                        <div class="library-card library-card-adaptive is-portrait">
+                          <div class="cover">
+                            <img src="outrage-nairn.png" alt="Outrage" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Outrage
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">Ian Nairn</p>
+                            <p class="mt-3 text-gray-300">
+                              A passionate critique of post-war Britain's architectural and planning failures.
+                            </p>
+                            <div>
+                              <span class="tag">Architecture</span
+                              ><span class="tag">Planning</span
+                              ><span class="tag">UK</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card library-card-adaptive is-portrait">
+                          <div class="cover">
+                            <img src="poor-charlies-almanack.png" alt="Poor Charlie's Almanack" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Poor Charlie's Almanack
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Charlie Munger
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Wisdom and wit from Berkshire Hathaway's Vice Chairman on business, investing, and life.
+                            </p>
+                            <div>
+                              <span class="tag">Business</span
+                              ><span class="tag">Investing</span
+                              ><span class="tag">Philosophy</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div id="tab-articles" class="tab-content">
-                    <div class="library-grid">
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            A Country of Cities
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">
-                            Vishaan Chakrabarti (excerpt)
-                          </p>
-                          <p class="mt-3 text-gray-300">
-                            Urban density as an engine for growth and
-                            sustainability.
-                          </p>
-                          <div>
-                            <span class="tag">Urbanism</span
-                            ><span class="tag">Design</span>
+                    <div
+                      id="lib-panel-articles"
+                      role="tabpanel"
+                      aria-labelledby="lib-articles"
+                      hidden
+                    >
+                      <div class="library-grid">
+                        <div class="library-card">
+                          <div class="cover">
+                            <img src="housingtheory.png" alt="The Housing Theory of Everything" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              The Housing Theory of Everything
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Sam Bowman et al.
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              A clean synthesis of why housing constraints drag on
+                              growth.
+                            </p>
+                            <div>
+                              <span class="tag">Housing</span
+                              ><span class="tag">Policy</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              A Country of Cities
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Vishaan Chakrabarti (excerpt)
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Urban density as an engine for growth and sustainability.
+                            </p>
+                            <div>
+                              <span class="tag">Urbanism</span
+                              ><span class="tag">Design</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              The Case Against Overregulation
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">Assorted</p>
+                            <p class="mt-3 text-gray-300">
+                              How excess rules throttle experimentation and progress.
+                            </p>
+                            <div>
+                              <span class="tag">Policy</span
+                              ><span class="tag">Progress</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Lessons from YC’s Startup Playbook
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">YC</p>
+                            <p class="mt-3 text-gray-300">
+                              Focus, speed, and talking to customers — still undefeated.
+                            </p>
+                            <div>
+                              <span class="tag">Startups</span
+                              ><span class="tag">Execution</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover">
+                            <img src="Plotagainstmercia.png" alt="The Plot Against Mercia" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              The Plot Against Mercia
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">John Myers</p>
+                            <p class="mt-3 text-gray-300">
+                              How London planners banned Midlands industrial growth to rebalance the economy, harming regional prosperity.
+                            </p>
+                            <div>
+                              <span class="tag">Housing</span
+                              ><span class="tag">Policy</span
+                              ><span class="tag">UK</span
+                              ><span class="tag">Planning</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            The Case Against Overregulation
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">Assorted</p>
-                          <p class="mt-3 text-gray-300">
-                            How excess rules throttle experimentation and
-                            progress.
-                          </p>
-                          <div>
-                            <span class="tag">Policy</span
-                            ><span class="tag">Progress</span>
+                    </div>
+
+                    <div
+                      id="lib-panel-tvpodcast"
+                      role="tabpanel"
+                      aria-labelledby="lib-tvpodcast"
+                      hidden
+                    >
+                      <div class="library-grid">
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              How to Build the Future
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Y Combinator
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Conversations with founders and innovators about building ambitious companies.
+                            </p>
+                            <div>
+                              <span class="tag">Startups</span
+                              ><span class="tag">Podcast</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="library-card">
-                        <div class="cover"></div>
-                        <div class="p-4">
-                          <h3 class="font-semibold text-gray-100 text-base">
-                            Lessons from YC’s Startup Playbook
-                          </h3>
-                          <p class="text-sm text-gray-400 mt-1">YC</p>
-                          <p class="mt-3 text-gray-300">
-                            Focus, speed, and talking to customers — still
-                            undefeated.
-                          </p>
-                          <div>
-                            <span class="tag">Startups</span
-                            ><span class="tag">Execution</span>
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              The Rest Is History
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Tom Holland & Dominic Sandbrook
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Deep dives into historical events and figures with wit and scholarship.
+                            </p>
+                            <div>
+                              <span class="tag">History</span
+                              ><span class="tag">Podcast</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover"></div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Grand Designs
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Kevin McCloud
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Following ambitious self-builders as they create their dream homes.
+                            </p>
+                            <div>
+                              <span class="tag">Architecture</span
+                              ><span class="tag">TV</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover">
+                            <img src="cheekypint.png" alt="Cheeky Pint" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Cheeky Pint
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              John Collison
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Wide-ranging conversations with interesting people over a pint.
+                            </p>
+                            <div>
+                              <span class="tag">Podcast</span
+                              ><span class="tag">Business</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover">
+                            <img src="civilisation.png" alt="Civilisation" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Civilisation
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Kenneth Clark
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Landmark documentary series exploring Western art and culture.
+                            </p>
+                            <div>
+                              <span class="tag">History</span
+                              ><span class="tag">Art</span
+                              ><span class="tag">TV</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="library-card">
+                          <div class="cover">
+                            <img src="nairn-across-britain.png" alt="Nairn Across Britain" />
+                          </div>
+                          <div class="p-4">
+                            <h3 class="font-semibold text-gray-100 text-base">
+                              Nairn Across Britain
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">
+                              Ian Nairn
+                            </p>
+                            <p class="mt-3 text-gray-300">
+                              Ian Nairn's passionate journey across Britain documenting architecture and townscapes.
+                            </p>
+                            <div>
+                              <span class="tag">Architecture</span
+                              ><span class="tag">TV</span
+                              ><span class="tag">UK</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -817,8 +1124,22 @@
 
         <footer
           id="footer-section"
-          class="font-pixel text-xs text-gray-500 mt-20 pt-8 border-t border-gray-800"
+          class="font-pixel text-xs text-gray-500 mt-20 pt-8"
         >
+          <div
+            id="footer-line-container"
+            class="footer-line-container"
+            aria-hidden="true"
+          >
+            <svg
+              id="footer-line"
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+              role="presentation"
+            >
+              <path id="footer-line-path" d="M0 50 Q 50 50 100 50"></path>
+            </svg>
+          </div>
           <div
             class="flex flex-col sm:flex-row justify-between items-center gap-4"
           >

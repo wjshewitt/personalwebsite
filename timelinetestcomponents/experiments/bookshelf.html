@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Books – Adaptive Bookshelf (Experiment)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./bookshelf.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>Adaptive Bookshelf</h1>
+      <p>Full covers on responsive shelves. Select a book to view details.</p>
+    </header>
+    <main class="container">
+      <section id="shelf" class="shelf-grid" role="list" aria-label="Bookshelf"></section>
+      <aside id="drawer" class="drawer" aria-live="polite" hidden>
+        <button id="closeDrawer" class="close" aria-label="Close details">×</button>
+        <div class="drawer-content"></div>
+      </aside>
+    </main>
+    <script src="./books-data.js"></script>
+    <script src="./bookshelf.js" type="module"></script>
+  </body>
+  </html>
