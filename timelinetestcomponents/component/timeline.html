@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Standalone Timeline Component</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap");
+
+      :root {
+        color-scheme: dark;
+        background-color: #111827;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #111827;
+        color: #f3f4f6;
+        font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+      }
+
+      body.light {
+        background: #f3f4f6;
+        color: #111827;
+      }
+
+      body.light h3 {
+        color: #111827;
+      }
+
+      #timeline-component {
+        width: min(100%, 64rem);
+      }
+    </style>
+  </head>
+  <body>
+    <section id="timeline-component" aria-label="Experience timeline">
+      <style>
+        /* Tokens (scoped) */
+        #timeline-component {
+          --color-bg: #111827;
+          --color-surface: #1f2937;
+          --color-card: rgba(255,255,255,0.02);
+          --color-track: #374151;
+          --color-border: rgba(148, 163, 184, 0.15);
+
+          --text-primary: #9ca3af;
+          --text-strong: #f3f4f6;
+
+          --accent-amber: #fbbf24;
+          --accent-amber-strong: #f59e0b;
+
+          --glow-amber-soft: 0 0 12px rgba(251, 191, 36, 0.45);
+
+          --radius-md: 8px;
+          --border-hairline: 1px;
+          --border-strong: 2px;
+          --border-accent: 3px;
+
+          --blur-xs: 2px;
+
+          --dur-fast: 150ms;
+          --dur: 200ms;
+          --dur-slow: 300ms;
+          --dur-reveal: 600ms;
+          --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+          --line-width: 3px;
+          --container-max: 64rem;
+          --line-fill: 0%;
+          --connector-length: 44px;
+          --dot-size: 18px;
+          --dot-offset: calc(var(--dot-size) / -2);
+
+          position: relative;
+          max-width: var(--container-max);
+          margin: 0 auto;
+          padding: 2rem 0;
+          content-visibility: auto;
+          contain-intrinsic-size: 800px;
+        }
+        html.light #timeline-component {
+          --color-surface: #ffffff;
+          --color-card: #ffffff;
+          --color-track: #d1d5db;
+          --color-border: rgba(0,0,0,0.08);
+          --text-primary: #374151;
+          --text-strong: #111827;
+        }
+
+        /* Rail */
+        #timeline-component .timeline-line {
+          position: absolute; top: 0; bottom: 0; left: 50%;
+          width: var(--line-width);
+          margin-left: calc(var(--line-width)/-2);
+          background: var(--color-track);
+          border-radius: 999px;
+          overflow: hidden;
+          z-index: 0;
+        }
+        #timeline-component .timeline-line::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: var(--line-fill);
+          background: linear-gradient(180deg, rgba(251,191,36,0.75), rgba(251,191,36,0.15));
+          transition: height var(--dur-slow) var(--ease);
+        }
+        html.light #timeline-component .timeline-line::after {
+          background: linear-gradient(180deg, rgba(59,130,246,0.85), rgba(59,130,246,0.25));
+        }
+
+        /* Item base */
+        #timeline-component .timeline-item {
+          position: relative;
+          width: 50%;
+          padding: 12px 40px;
+          opacity: 0;
+          transition: opacity var(--dur-reveal) var(--ease),
+                      transform var(--dur-reveal) var(--ease);
+          z-index: 1;
+        }
+        #timeline-component .timeline-item + .timeline-item {
+          margin-top: 2.5rem;
+        }
+        #timeline-component .timeline-item.left {
+          left: 0;
+          transform: translateY(18px);
+        }
+        #timeline-component .timeline-item.right {
+          left: 50%;
+          transform: translateY(-18px);
+        }
+        #timeline-component .timeline-item.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* Marker */
+        #timeline-component .timeline-item::before {
+          content: "";
+          position: absolute;
+          top: var(--marker-top, 32px);
+          height: 2px;
+          width: var(--connector-length);
+          background: var(--color-track);
+          transform: translateY(-50%);
+          transition: background-color var(--dur) var(--ease);
+          z-index: 1;
+        }
+        #timeline-component .timeline-item.left::before {
+          right: calc(var(--dot-offset));
+        }
+        #timeline-component .timeline-item.right::before {
+          left: calc(var(--dot-offset));
+        }
+        #timeline-component .timeline-item.is-visible::before {
+          background: var(--accent-amber);
+        }
+        #timeline-component .timeline-item.is-passed::before {
+          background: linear-gradient(90deg, var(--accent-amber), #ef4444);
+        }
+        #timeline-component .timeline-item.left.is-passed::before {
+          background: linear-gradient(270deg, var(--accent-amber), #ef4444);
+        }
+
+        #timeline-component .timeline-item::after {
+          content: "";
+          position: absolute;
+          width: var(--dot-size); height: var(--dot-size);
+          top: var(--marker-top, 32px);
+          right: calc(var(--dot-offset));
+          transform: translateY(-50%);
+          background: #1f2937;
+          border: var(--border-accent) solid var(--color-track);
+          border-radius: 50%;
+          transition: box-shadow var(--dur) var(--ease),
+                      border-color var(--dur) var(--ease),
+                      background-color var(--dur) var(--ease);
+          z-index: 2;
+        }
+        #timeline-component .timeline-item.right::after {
+          right: auto;
+          left: calc(var(--dot-offset));
+        }
+        #timeline-component .timeline-item.is-visible::after {
+          box-shadow: var(--glow-amber-soft);
+          border-color: var(--accent-amber);
+        }
+        #timeline-component .timeline-item.is-passed::after {
+          background: linear-gradient(135deg, var(--accent-amber), #ef4444);
+          border-color: var(--accent-amber);
+        }
+
+        /* Content card */
+        #timeline-component .timeline-content {
+          background: var(--color-card);
+          border: var(--border-hairline) solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 1rem;
+          backdrop-filter: blur(var(--blur-xs));
+          transition: transform var(--dur) var(--ease),
+                      box-shadow var(--dur) var(--ease),
+                      border-color var(--dur) var(--ease);
+          cursor: pointer;
+          outline: none;
+          position: relative;
+        }
+        #timeline-component .timeline-content:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+          border-color: rgba(251,191,36,0.6);
+        }
+        #timeline-component .timeline-item.is-current .timeline-content {
+          border-color: rgba(251,191,36,0.6);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        }
+        #timeline-component .timeline-item.is-current::after {
+          box-shadow: var(--glow-amber-soft), 0 0 0 6px rgba(251,191,36,0.12);
+          background: var(--accent-amber);
+          border-color: var(--accent-amber-strong);
+        }
+        #timeline-component .timeline-content:focus-visible {
+          outline: 2px solid var(--accent-amber);
+          outline-offset: 2px;
+        }
+
+        /* Type */
+        #timeline-component h3 {
+          margin: 0 0 0.4rem 0;
+          color: var(--text-strong);
+          font-family: "Press Start 2P", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          font-size: 1rem;
+          line-height: 1.4;
+        }
+        #timeline-component p {
+          margin: 0;
+          color: var(--text-primary);
+          font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+          line-height: 1.8;
+          font-size: 0.95rem;
+        }
+
+        /* Mobile layout */
+        @media (max-width: 768px) {
+          #timeline-component .timeline-line {
+            left: 32px;
+            margin-left: calc(var(--line-width)/-2);
+          }
+          #timeline-component .timeline-item {
+            width: 100%; left: 0;
+            padding-left: 72px; padding-right: 18px;
+            transform: translateY(16px);
+          }
+          #timeline-component .timeline-item.left,
+          #timeline-component .timeline-item.right {
+            transform: translateY(16px);
+          }
+          #timeline-component .timeline-item.is-visible {
+            transform: translateY(0);
+          }
+          #timeline-component .timeline-item {
+            --connector-length: 52px;
+            --dot-offset: calc(-1 * (var(--dot-size) / 2));
+          }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          #timeline-component * {
+            animation: none !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      </style>
+
+      <div class="timeline-line" aria-hidden="true"></div>
+      <!-- Items will be injected by the script below -->
+    </section>
+
+    <script>
+    (() => {
+      const root = document.getElementById('timeline-component');
+      if (!root) return;
+
+      const itemsData = [
+        { title: 'Inception', body: 'Foundational research and concept exploration.' },
+        { title: 'Prototype', body: 'Clickable demo validating core interactions.' },
+        { title: 'Growth', body: 'Onboarding revamp and analytics-driven iteration.' },
+        { title: 'Ecosystem', body: 'SDKs and webhooks for integrations and automation.' },
+        { title: 'Internationalization', body: 'i18n + l10n with RTL and locale care.' },
+        { title: 'Major Release', body: 'Collaboration, export, and advanced search.' },
+        { title: 'Scale Up', body: 'Infra scaling, caching, and monitoring roll-out.' },
+        { title: 'Launch 2025', body: 'Public release with performance and a11y passes.' }
+      ];
+
+      const frag = document.createDocumentFragment();
+      itemsData.forEach((item, i) => {
+        const side = i % 2 === 0 ? 'left' : 'right';
+        const el = document.createElement('article');
+        el.className = `timeline-item ${side}`;
+        el.innerHTML = `
+          <div class="timeline-content" role="button" tabindex="0" aria-label="${item.title}">
+            <h3>${item.title}</h3>
+            <p>${item.body}</p>
+          </div>`;
+        frag.appendChild(el);
+      });
+      root.appendChild(frag);
+
+      const items = Array.from(root.querySelectorAll('.timeline-item'));
+      const state = items.map((el, index) => ({ el, index, seen: false }));
+
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      let ticking = false;
+      const scheduleRefresh = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          refreshStates();
+        });
+      };
+
+      function refreshStates() {
+        let consecutive = -1;
+        for (let i = 0; i < state.length; i += 1) {
+          if (state[i].seen) {
+            consecutive = i;
+          } else {
+            break;
+          }
+        }
+
+        state.forEach((item, idx) => {
+          if (item.seen && !item.el.classList.contains('is-visible')) {
+            item.el.classList.add('is-visible');
+          }
+          item.el.classList.toggle('is-passed', consecutive !== -1 && idx < consecutive);
+          item.el.classList.toggle('is-current', consecutive !== -1 && idx === consecutive);
+        });
+
+        updateLineFill(consecutive);
+      }
+
+      function updateLineFill(consecutive) {
+        if (!state.length) {
+          root.style.setProperty('--line-fill', '0%');
+          return;
+        }
+        const rect = root.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const distanceInto = viewportHeight - rect.top;
+        const range = rect.height + viewportHeight;
+        const progressScroll = range > 0 ? clamp(distanceInto / range, 0, 1) : 0;
+        const progressSeen = consecutive >= 0 ? (consecutive + 1) / state.length : 0;
+        const progress = Math.max(progressSeen, progressScroll);
+        root.style.setProperty('--line-fill', `${(progress * 100).toFixed(2)}%`);
+      }
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduce) {
+        state.forEach((item) => {
+          item.seen = true;
+          item.el.classList.add('is-visible');
+        });
+        refreshStates();
+      } else {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const targetIndex = state.findIndex((item) => item.el === entry.target);
+            if (targetIndex === -1) return;
+            if (!state[targetIndex].seen) {
+              state[targetIndex].seen = true;
+            }
+          });
+          refreshStates();
+        }, { threshold: 0.45, rootMargin: '-12% 0% -12% 0%' });
+
+        state.forEach((item) => observer.observe(item.el));
+
+        window.addEventListener('scroll', scheduleRefresh, { passive: true });
+        window.addEventListener('resize', scheduleRefresh);
+        scheduleRefresh();
+      }
+
+      document.addEventListener('keydown', (e) => {
+        const c = e.target && e.target.closest && e.target.closest('#timeline-component .timeline-content');
+        if (!c) return;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+      });
+    })();
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Library — Tabs Experiment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --amber: #fbbf24;
+        --red: #ef4444;
+        --violet: #8b5cf6;
+        --bg: #111827;
+        --track: #374151;
+        --elev: #1f2937;
+      }
+      html {
+        background: var(--bg);
+        color-scheme: dark;
+      }
+      body {
+        font-family: "Space Mono", monospace;
+        color: #9ca3af;
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: start;
+        padding: 2rem 1.25rem 3rem;
+      }
+      h1,
+      .pixel {
+        font-family: "Press Start 2P", cursive;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* Segmented control (liquid glass + gradient thumb) */
+      .seg {
+        position: relative;
+        display: inline-flex;
+        gap: 0.25rem;
+        padding: 0.35rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 9999px;
+        backdrop-filter: blur(10px) saturate(130%);
+        -webkit-backdrop-filter: blur(10px) saturate(130%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      }
+      .seg::before {
+        content: "";
+        position: absolute;
+        inset: -60% -40%;
+        background: conic-gradient(
+          from 180deg,
+          transparent 35%,
+          var(--amber),
+          var(--red),
+          var(--violet),
+          transparent 65%
+        );
+        filter: blur(14px);
+        opacity: 0.22;
+        pointer-events: none;
+      }
+      .thumb {
+        position: absolute;
+        top: 50%;
+        left: var(--x, 0px);
+        width: var(--w, 0px);
+        height: 32px;
+        border-radius: 9999px;
+        background: linear-gradient(
+          135deg,
+          var(--amber),
+          var(--red) 50%,
+          var(--violet)
+        );
+        box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+        transform: translateY(-50%);
+        transition: left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+          width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      [role="tab"] {
+        position: relative;
+        z-index: 1;
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: #9ca3af;
+        border-radius: 9999px;
+        padding: 0.5rem 1rem;
+        font: inherit;
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      [role="tab"][aria-selected="true"] {
+        color: #111827;
+      }
+      [role="tab"]:focus-visible {
+        outline: 2px solid var(--amber);
+        outline-offset: 2px;
+      }
+
+      /* Panels + cards (echo site library aesthetic) */
+      .panels {
+        margin-top: 1.25rem;
+      }
+      .panel {
+        display: none;
+      }
+      .panel[aria-hidden="false"] {
+        display: block;
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+      .card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.18),
+          rgba(255, 255, 255, 0.08)
+        );
+        backdrop-filter: blur(14px) saturate(130%);
+        -webkit-backdrop-filter: blur(14px) saturate(130%);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+        transition: transform 0.25s ease, box-shadow 0.25s ease,
+          border-color 0.25s ease, background 0.25s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(251, 191, 36, 0.55);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.32);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.22),
+          rgba(255, 255, 255, 0.12)
+        );
+      }
+      .cover {
+        height: 120px;
+        background: radial-gradient(
+            100% 100% at 0% 0%,
+            rgba(251, 191, 36, 0.24),
+            transparent 60%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.2),
+            rgba(239, 68, 68, 0.18)
+          );
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      .card h3 {
+        margin: 0 0 0.4rem 0;
+        color: #f3f4f6;
+        font-family: "Press Start 2P", cursive;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+      .card p {
+        margin: 0;
+        color: #d1d5db;
+        line-height: 1.7;
+        font-size: 0.95rem;
+      }
+      .card .meta {
+        color: #9ca3af;
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        background: #374151;
+        color: #e5e7eb;
+        border-radius: 9999px;
+        padding: 0.2rem 0.6rem;
+        margin: 0.35rem 0.35rem 0 0;
+      }
+
+      /* Light preview (optional: toggle body.light in dev tools) */
+      body.light {
+        background: #f3f4f6;
+        color-scheme: light;
+        color: #374151;
+      }
+      body.light .card {
+        border-color: rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      }
+      body.light .card:hover {
+        border-color: rgba(59, 130, 246, 0.45);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 18px 28px rgba(0, 0, 0, 0.14);
+      }
+      body.light .tag {
+        background: #e5e7eb;
+        color: #374151;
+      }
+      body.light .card h3 {
+        color: #111827;
+      }
+      body.light [role="tab"][aria-selected="true"] {
+        color: #111827;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .thumb,
+        .card {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1 class="pixel" style="color: #f3f4f6; margin-bottom: 1rem">
+        Library — Tabs Experiment
+      </h1>
+
+      <div class="seg" role="tablist" aria-label="Library tabs">
+        <div class="thumb" aria-hidden="true"></div>
+        <button
+          id="tab-books"
+          class="tab"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-books"
+        >
+          Books
+        </button>
+        <button
+          id="tab-articles"
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-articles"
+        >
+          Articles
+        </button>
+      </div>
+
+      <section class="panels">
+        <div
+          id="panel-books"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-books"
+          aria-hidden="false"
+        >
+          <div class="grid">
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>Where Is My Flying Car?</h3>
+                <p class="meta">J. Storrs Hall</p>
+                <p style="margin-top: 0.5rem">
+                  On progress, energy density, and why the future stalled.
+                </p>
+                <div>
+                  <span class="tag">Progress</span><span class="tag">Tech</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>The Power Broker</h3>
+                <p class="meta">Robert Caro</p>
+                <p style="margin-top: 0.5rem">
+                  Masterclass in power, planning, and unintended consequences.
+                </p>
+                <div>
+                  <span class="tag">Planning</span
+                  ><span class="tag">History</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div
+          id="panel-articles"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-articles"
+          aria-hidden="true"
+        >
+          <div class="grid">
+            <article class="card">
+              <div class="cover">
+                <img
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAYAAAC+Ey... [full base64 string from user image]"
+                  alt="The Housing Theory of Everything"
+                />
+              </div>
+              <div style="padding: 1rem">
+                <h3>The Housing Theory of Everything</h3>
+                <p class="meta">Sam Bowman et al.</p>
+                <p style="margin-top: 0.5rem">
+                  A clean synthesis of why housing constraints drag on growth.
+                </p>
+                <div>
+                  <span class="tag">Housing</span
+                  ><span class="tag">Policy</span>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>A Country of Cities</h3>
+                <p class="meta">Vishaan Chakrabarti (excerpt)</p>
+                <p style="margin-top: 0.5rem">
+                  Urban density as an engine for growth and sustainability.
+                </p>
+                <div>
+                  <span class="tag">Urbanism</span
+                  ><span class="tag">Design</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>The Case Against Overregulation</h3>
+                <p class="meta">Assorted</p>
+                <p style="margin-top: 0.5rem">
+                  How excess rules throttle experimentation and progress.
+                </p>
+                <div>
+                  <span class="tag">Policy</span
+                  ><span class="tag">Progress</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>Lessons from YC’s Startup Playbook</h3>
+                <p class="meta">YC</p>
+                <p style="margin-top: 0.5rem">
+                  Focus, speed, and talking to customers — still undefeated.
+                </p>
+                <div>
+                  <span class="tag">Startups</span
+                  ><span class="tag">Execution</span>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="cover"></div>
+              <div style="padding: 1rem">
+                <h3>The Plot Against Mercia</h3>
+                <p class="meta">John Myers</p>
+                <p style="margin-top: 0.5rem">
+                  How London planners banned Midlands industrial growth to
+                  rebalance the economy, harming regional prosperity.
+                </p>
+                <div>
+                  <span class="tag">Housing</span><span class="tag">Policy</span
+                  ><span class="tag">UK</span><span class="tag">Planning</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const seg = document.querySelector(".seg");
+        const thumb = seg.querySelector(".thumb");
+        const tabs = Array.from(seg.querySelectorAll("[role=tab]"));
+        const panels = Array.from(document.querySelectorAll("[role=tabpanel]"));
+
+        function positionThumb(i) {
+          const t = tabs[i];
+          const tr = t.getBoundingClientRect();
+          const sr = seg.getBoundingClientRect();
+          const x = tr.left - sr.left; // relative to seg
+          thumb.style.setProperty("--x", x + "px");
+          thumb.style.setProperty("--w", tr.width + "px");
+        }
+
+        function activate(i) {
+          tabs.forEach((t, idx) => {
+            t.setAttribute("aria-selected", idx === i ? "true" : "false");
+            if (idx === i) t.focus({ preventScroll: true });
+          });
+          panels.forEach((p, idx) =>
+            p.setAttribute("aria-hidden", idx === i ? "false" : "true")
+          );
+          positionThumb(i);
+        }
+
+        tabs.forEach((t, idx) => {
+          t.addEventListener("click", () => activate(idx));
+          t.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              activate((idx + 1) % tabs.length);
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              activate((idx - 1 + tabs.length) % tabs.length);
+            } else if (e.key === "Home") {
+              e.preventDefault();
+              activate(0);
+            } else if (e.key === "End") {
+              e.preventDefault();
+              activate(tabs.length - 1);
+            } else if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              activate(idx);
+            }
+          });
+        });
+
+        window.addEventListener("resize", () => {
+          const i = tabs.findIndex(
+            (t) => t.getAttribute("aria-selected") === "true"
+          );
+          if (i >= 0) positionThumb(i);
+        });
+
+        // init
+        activate(0);
+      })();
+    </script>
+  </body>
+</html>

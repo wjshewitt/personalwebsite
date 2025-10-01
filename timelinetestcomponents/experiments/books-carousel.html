@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Books – Scroll‑Snap Carousel (Experiment)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./books-carousel.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>Scroll‑Snap Carousel</h1>
+      <p>Horizontal browsing with a detail drawer. Use wheel/touch/arrow keys.</p>
+    </header>
+    <main class="container">
+      <div class="viewport">
+        <div id="track" class="track" aria-label="Books carousel"></div>
+      </div>
+      <aside id="drawer" class="drawer" aria-live="polite" hidden>
+        <button id="closeDrawer" class="close" aria-label="Close details">×</button>
+        <div class="drawer-content"></div>
+      </aside>
+    </main>
+    <script src="./books-data.js"></script>
+    <script src="./books-carousel.js" type="module"></script>
+  </body>
+  </html>
