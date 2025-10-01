@@ -21,16 +21,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const footerLineContainer = document.getElementById("footer-line-container");
   const footerLineSvg = document.getElementById("footer-line");
   const footerLinePath = document.getElementById("footer-line-path");
-  const themeToggleCheckbox = document.getElementById("theme-checkbox");
-  const utilityControls = document.getElementById("utility-controls");
-  const drawControl = document.getElementById("draw-control");
-  const drawTrigger = document.getElementById("draw-trigger");
-  const drawMenu = document.getElementById("draw-menu");
-  const drawModeToggle = document.getElementById("draw-mode-toggle");
-  const drawTrailToggle = document.getElementById("draw-trail-toggle");
-  const drawColourButtons = Array.from(
+    const drawColourButtons = Array.from(
     document.querySelectorAll(".draw-colour")
   );
+  const sideNavSettingsToggle = document.getElementById(
+    "side-nav-settings-toggle"
+  );
+  const sideNavSettingsLabel = sideNavSettingsToggle?.querySelector(
+    ".side-nav-label"
+  );
+  const sideNavLinksWrapper = document.getElementById("side-nav-links");
+  const sideNavSettingsPanel = document.getElementById(
+    "side-nav-settings-panel"
+  );
+  const sideNavThemeToggle = document.getElementById("side-nav-theme-toggle");
+  const sideNavDrawEnable = document.getElementById("side-nav-draw-enable");
+  const sideNavDrawTrail = document.getElementById("side-nav-draw-trail");
+  const sideNavColourToggle = document.getElementById(
+    "side-nav-colour-toggle"
+  );
+  const sideNavColourPanel = document.getElementById("side-nav-colour-list");
+  const sideNavColourControl = document.querySelector(
+    ".side-nav-colour-control"
+  );
+  const sideNavColourButtons = Array.from(
+    document.querySelectorAll(".side-nav-colour")
+  );
+  const sideNavSettingsDefaultLabel =
+    sideNavSettingsLabel?.textContent?.trim() || "Settings";
   const initialisingContainer = document.getElementById(
     "initialising-container"
   );
@@ -52,10 +70,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let introTypingComplete = false;
   let animationSkipped = false;
   let nameToggleRunning = false;
+  let headerLocked = false;
+  let headerLockScroll = 0;
+  let headerScrollBlockerActive = false;
+  let lastTouchY = null;
   let drawEnabled = false;
   let drawMenuOpen = false;
   let drawColourKey = "amber";
   let drawTrailEnabled = true;
+  let colourPanelOpen = false;
+  let themeTransitionTimer = null;
+  let themeInitialized = false;
   const isTouchDevice =
     "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const reduceMotion = window.matchMedia(
@@ -271,11 +296,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect = footerLineContainer.getBoundingClientRect();
       const x = clamp(pointer.clientX - rect.left, 0, width);
       const y = clamp(pointer.clientY - rect.top, 0, height);
-      const dx = x - rest.x;
-      const dy = y - rest.y;
-      const distance = Math.hypot(dx, dy);
-      const grabThreshold = width * grabThresholdRatio;
-      if (distance <= grabThreshold) {
+      
+      // Calculate distance from pointer to the bow curve (quadratic bezier)
+      // Bow goes from (0, rest.y) through (control.x, control.y) to (width, rest.y)
+      // For simplicity, we sample points along the curve and find the closest
+      const numSamples = 20;
+      let minDistanceToCurve = Infinity;
+      
+      for (let i = 0; i <= numSamples; i++) {
+        const t = i / numSamples;
+        // Quadratic bezier formula: B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+        const curveX = (1-t) * (1-t) * 0 + 2 * (1-t) * t * control.x + t * t * width;
+        const curveY = (1-t) * (1-t) * rest.y + 2 * (1-t) * t * control.y + t * t * rest.y;
+        const dist = Math.hypot(x - curveX, y - curveY);
+        minDistanceToCurve = Math.min(minDistanceToCurve, dist);
+      }
+      
+      // Use a more generous threshold that works along the entire bow
+      const interactionThreshold = height * 0.5; // Half the container height
+      
+      if (minDistanceToCurve <= interactionThreshold) {
         pointerActive = true;
         baseTarget.x = x;
         baseTarget.y = y;
@@ -283,7 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
         target.y = y;
         return;
       }
-      if (distance >= grabThreshold * releaseMultiplier) {
+      
+      if (minDistanceToCurve >= interactionThreshold * 1.2) {
         pointerActive = false;
         baseTarget.x = rest.x;
         baseTarget.y = rest.y;
@@ -312,11 +353,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const bottomReached =
         window.innerHeight + window.scrollY >= doc.scrollHeight - 1;
       if (!bottomReached) return;
+      const prevStretch = scrollStretch;
       scrollStretch = clamp(
         scrollStretch + event.deltaY * scrollScale,
         0,
         maxStretch
       );
+      
+      // Auto-expand library section when footer line bows to 85% of max stretch
+      const bowThreshold = maxStretch * 0.85;
+      if (prevStretch < bowThreshold && scrollStretch >= bowThreshold) {
+        const libraryHeading = document.getElementById("library-heading");
+        const libraryContentWrapper = libraryHeading?.nextElementSibling;
+        if (libraryHeading && libraryContentWrapper && !libraryContentWrapper.classList.contains("open")) {
+          // Trigger the library section to open
+          libraryHeading.click();
+        }
+      }
     };
 
     const resizeObserver = new ResizeObserver(setDimensions);
@@ -750,6 +803,14 @@ document.addEventListener("DOMContentLoaded", () => {
       isAnimating = false;
       terminalBox.classList.add("fade-out");
       document.body.classList.add("scroll-enabled");
+      
+      // Show side nav immediately when intro ends
+      const sideNav = document.getElementById("side-nav");
+      if (sideNav) {
+        setTimeout(() => {
+          sideNav.classList.add("is-ready");
+        }, 300);
+      }
     }, 150);
   }
 
@@ -823,7 +884,92 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Scroll + sticky
+  function lockStickyHeader() {
+    if (headerLocked) return;
+    headerLocked = true;
+    headerLockScroll = Math.max(window.scrollY, 0);
+    stickyHeader.classList.add("visible");
+    stickySocials.style.opacity = "1";
+    originalSocials.style.opacity = "0";
+    enableHeaderScrollBlocker();
+  }
+
+  function enforceStickyHeaderLock() {
+    if (!headerLocked) return;
+    stickyHeader.classList.add("visible");
+    stickySocials.style.opacity = "1";
+    originalSocials.style.opacity = "0";
+  }
+
+  function headerWheelBlocker(event) {
+    if (!headerLocked) return;
+    if (event.deltaY < 0 && window.scrollY <= headerLockScroll + 0.5) {
+      event.preventDefault();
+    }
+  }
+
+  function headerTouchStart(event) {
+    if (!headerLocked || !event.touches?.length) return;
+    lastTouchY = event.touches[0].clientY;
+  }
+
+  function headerTouchMoveBlocker(event) {
+    if (!headerLocked || !event.touches?.length) return;
+    const currentY = event.touches[0].clientY;
+    if (lastTouchY !== null) {
+      const deltaY = currentY - lastTouchY;
+      if (deltaY > 0 && window.scrollY <= headerLockScroll + 0.5) {
+        event.preventDefault();
+      }
+    }
+    lastTouchY = currentY;
+  }
+
+  function enableHeaderScrollBlocker() {
+    if (headerScrollBlockerActive) return;
+    headerScrollBlockerActive = true;
+    window.addEventListener("wheel", headerWheelBlocker, { passive: false });
+    window.addEventListener("touchstart", headerTouchStart, {
+      passive: false,
+    });
+    window.addEventListener("touchmove", headerTouchMoveBlocker, {
+      passive: false,
+    });
+    window.addEventListener(
+      "touchend",
+      () => {
+        lastTouchY = null;
+      },
+      { passive: true }
+    );
+    window.addEventListener(
+      "touchcancel",
+      () => {
+        lastTouchY = null;
+      },
+      { passive: true }
+    );
+  }
+
   function handleScroll() {
+    const triggerRect = headerTrigger.getBoundingClientRect();
+    const shouldLockHeader = triggerRect.top < 52;
+    if (shouldLockHeader) {
+      lockStickyHeader();
+    } else if (!headerLocked) {
+      stickyHeader.classList.remove("visible");
+      stickySocials.style.opacity = "0";
+      originalSocials.style.opacity = "1";
+    }
+
+    if (headerLocked) {
+      enforceStickyHeaderLock();
+    }
+
+    if (isDocked) {
+      return;
+    }
+
     if (introTypingComplete && !isDocked) {
       const scrollY = window.scrollY;
       const introScrollEnd = window.innerHeight * 0.75;
@@ -838,8 +984,7 @@ document.addEventListener("DOMContentLoaded", () => {
       terminalBox.style.transform = `translate(-50%,-50%) scale(${newScale})`;
       terminalBox.style.top = `${newTop}px`;
 
-      const triggerRect = headerTrigger.getBoundingClientRect();
-      if (triggerRect.top < endTop + 20 && !isDocked) {
+      if (shouldLockHeader && !isDocked) {
         isDocked = true;
         const spacerHeight = introSpacer.offsetHeight;
         introSpacer.style.display = "none";
@@ -847,19 +992,40 @@ document.addEventListener("DOMContentLoaded", () => {
         terminalBox.classList.add("docked");
         const introContainer = terminalBox.querySelector("#intro-container");
         if (introContainer) introContainer.style.padding = "0";
-      document.body.classList.add("draw-ready");
+        document.body.classList.add("draw-ready");
+
+        terminalBox.style.position = "fixed";
+        terminalBox.style.top = "32px";
+        terminalBox.style.left = "50%";
+        terminalBox.style.transform = "translate(-50%, -50%) scale(0.4)";
+        terminalBox.style.transition = "none";
+
+        terminalBox.style.setProperty("--grid-align-translate", "0px");
+        terminalBox.style.setProperty("--grid-align-start", "0px");
+        terminalBox.style.setProperty("--grid-align-end", "0px");
+
+        const terminalTargetIndex = gridAlignmentTargets.findIndex(
+          (t) => t.selector === "#terminal-box.docked"
+        );
+        if (terminalTargetIndex !== -1) {
+          gridAlignmentTargets.splice(terminalTargetIndex, 1);
+        }
+
+        headerLockScroll = Math.max(window.scrollY, 0);
+        lockStickyHeader();
+
+        // Show side nav when terminal docks
+        const sideNav = document.getElementById("side-nav");
+        if (sideNav) {
+          sideNav.classList.add("is-ready");
+        }
+
         startNameToggleAnimation();
+
+        requestAnimationFrame(() => {
+          alignContentToGrid();
+        });
       }
-    }
-    const triggerRect = headerTrigger.getBoundingClientRect();
-    if (triggerRect.top < 52) {
-      stickyHeader.classList.add("visible");
-      stickySocials.style.opacity = "1";
-      originalSocials.style.opacity = "0";
-    } else {
-      stickyHeader.classList.remove("visible");
-      stickySocials.style.opacity = "0";
-      originalSocials.style.opacity = "1";
     }
   }
 
@@ -921,6 +1087,30 @@ document.addEventListener("DOMContentLoaded", () => {
       border: "rgba(132, 204, 22, 0.7)",
       trail: "rgba(163, 230, 53, 0.16)",
     },
+    emerald: {
+      key: "emerald",
+      name: "Emerald",
+      strong: "#34d399",
+      fill: "rgba(52, 211, 153, 0.16)",
+      border: "rgba(16, 185, 129, 0.7)",
+      trail: "rgba(52, 211, 153, 0.12)",
+    },
+    rose: {
+      key: "rose",
+      name: "Rose",
+      strong: "#f472b6",
+      fill: "rgba(244, 114, 182, 0.18)",
+      border: "rgba(219, 39, 119, 0.7)",
+      trail: "rgba(244, 114, 182, 0.14)",
+    },
+    cyan: {
+      key: "cyan",
+      name: "Cyan",
+      strong: "#22d3ee",
+      fill: "rgba(34, 211, 238, 0.16)",
+      border: "rgba(6, 182, 212, 0.7)",
+      trail: "rgba(34, 211, 238, 0.12)",
+    },
   };
   const gridAlignmentTargets = [
     { selector: "#page-content-wrapper > .max-w-4xl", reference: "left" },
@@ -929,6 +1119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { selector: "#timeline-component", reference: "center" },
     { selector: ".library-grid", reference: "center" },
     { selector: "#footer-line-container", reference: "center" },
+    { selector: "#terminal-box.docked", reference: "center" },
   ];
   let drawingMode = null;
 
@@ -979,7 +1170,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const interactiveSelector =
-    "a, button, input, textarea, select, summary, label, [role='button'], [role='link'], [data-prevent-draw], video, audio, #modal-overlay, #modal-content, #side-nav, #terminal-box, #sticky-header, .collapsible-heading, .timeline-content, .experience-item, .project-box, .side-nav-item, .social-link, .theme-switch, .draw-control, .draw-trigger, #draw-menu";
+    "a, button, input, textarea, select, summary, label, [role='button'], [role='link'], [data-prevent-draw], video, audio, #modal-overlay, #modal-content, #side-nav, #terminal-box, #sticky-header, .collapsible-heading, .timeline-content, .experience-item, .project-box, .side-nav-item, .social-link";
 
   function getCellFromEvent(event) {
     if (!cells.length) return null;
@@ -1033,6 +1224,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gridAlignmentTargets.forEach(({ selector, reference = "left" }) => {
       document.querySelectorAll(selector).forEach((element) => {
         if (!element) return;
+        
+        // CRITICAL: Skip terminal once it's docked - it's permanently fixed
+        if (element.id === "terminal-box" && isDocked) {
+          return;
+        }
 
         element.classList.add("grid-aligned");
         element.style.setProperty("--grid-align-start", "0px");
@@ -1072,10 +1268,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+    
+    // Ensure sticky header alignment matches terminal box when both are visible
+    if (isDocked && stickyHeader?.classList.contains('visible')) {
+      syncHeaderAlignment();
+    }
+  }
+  
+  function syncHeaderAlignment() {
+    if (!terminalBox || !stickyHeader) return;
+    
+    // Get the grid-aligned translate value from terminal box if it's docked
+    const terminalTranslate = terminalBox.style.getPropertyValue("--grid-align-translate") || "0px";
+    
+    // Apply the same alignment to sticky header content
+    const stickyContent = stickyHeader.querySelector('.max-w-4xl');
+    if (stickyContent) {
+      stickyContent.style.setProperty("--grid-align-translate", terminalTranslate);
+      stickyContent.classList.add("grid-aligned");
+    }
   }
 
   function clearAllLockedCells() {
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
       cell.classList.remove("grid-cell--locked");
     });
     lockedCells.clear();
@@ -1137,6 +1352,26 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.setAttribute("aria-checked", String(isSelected));
       btn.classList.toggle("is-selected", isSelected);
     });
+    if (sideNavColourToggle) {
+      sideNavColourToggle.setAttribute("data-colour", colour.key);
+      const toggleLabel = sideNavColourToggle.querySelector(
+        ".side-nav-colour-label"
+      );
+      const toggleSwatch = sideNavColourToggle.querySelector(
+        ".side-nav-colour-swatch"
+      );
+      if (toggleLabel) {
+        toggleLabel.textContent = `Drawing colour: ${colour.name}`;
+      }
+      if (toggleSwatch) {
+        toggleSwatch.dataset.colour = colour.key;
+      }
+    }
+    sideNavColourButtons.forEach((btn) => {
+      const isSelected = btn.dataset.colour === colour.key;
+      btn.setAttribute("aria-checked", String(isSelected));
+      btn.classList.toggle("is-selected", isSelected);
+    });
     if (save) {
       try {
         localStorage.setItem("drawColour", colour.key);
@@ -1153,14 +1388,12 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       document.body.classList.add("draw-ready");
     }
-    if (drawModeToggle) {
-      drawModeToggle.setAttribute("aria-checked", String(drawEnabled));
-      drawModeToggle.classList.toggle("is-active", drawEnabled);
+        if (sideNavDrawEnable) {
+      sideNavDrawEnable.setAttribute("aria-pressed", String(drawEnabled));
+      sideNavDrawEnable.textContent = drawEnabled
+        ? "Disable drawing"
+        : "Enable drawing";
     }
-    if (drawTrigger) {
-      drawTrigger.setAttribute("aria-pressed", String(drawEnabled));
-    }
-    if (drawControl) drawControl.classList.toggle("is-active", drawEnabled);
     if (!drawEnabled) resetDrawingState();
     if (save) {
       try {
@@ -1176,9 +1409,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setDrawTrailEnabled(value, { save = true } = {}) {
     drawTrailEnabled = Boolean(value);
-    if (drawTrailToggle) {
-      drawTrailToggle.setAttribute("aria-checked", String(drawTrailEnabled));
-      drawTrailToggle.classList.toggle("is-active", drawTrailEnabled);
+        if (sideNavDrawTrail) {
+      sideNavDrawTrail.setAttribute("aria-pressed", String(drawTrailEnabled));
+      sideNavDrawTrail.textContent = drawTrailEnabled
+        ? "Disable trail effect"
+        : "Enable trail effect";
     }
     document.body.classList.toggle("draw-trail-disabled", !drawTrailEnabled);
     if (!drawTrailEnabled) clearPixelTrailActivity();
@@ -1189,45 +1424,84 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function openDrawMenu() {
-    if (!drawControl || !drawMenu) return;
-    drawMenuOpen = true;
-    drawControl.classList.add("open");
-    drawMenu.setAttribute("aria-hidden", "false");
-    drawTrigger?.setAttribute("aria-expanded", "true");
-    if (drawModeToggle) {
+  
+  function openSideNavColourPanel({ focusFirst = true } = {}) {
+    if (!sideNavColourToggle || !sideNavColourPanel || colourPanelOpen)
+      return;
+    colourPanelOpen = true;
+    sideNavColourToggle.setAttribute("aria-expanded", "true");
+    sideNavColourPanel.hidden = false;
+    if (focusFirst) {
       requestAnimationFrame(() => {
-        drawModeToggle.focus({ preventScroll: true });
+        const selectedButton = sideNavColourButtons.find(
+          (btn) => btn.getAttribute("aria-checked") === "true"
+        );
+        (selectedButton || sideNavColourButtons[0])?.focus({
+          preventScroll: true,
+        });
       });
     }
   }
 
-  function closeDrawMenu({ focusTrigger = false } = {}) {
-    if (!drawControl || !drawMenu) return;
-    drawMenuOpen = false;
-    drawControl.classList.remove("open");
-    drawMenu.setAttribute("aria-hidden", "true");
-    drawTrigger?.setAttribute("aria-expanded", "false");
-    if (focusTrigger) {
-      drawTrigger?.focus({ preventScroll: true });
+  function closeSideNavColourPanel({ focusToggle = false } = {}) {
+    if (!sideNavColourToggle || !sideNavColourPanel || !colourPanelOpen)
+      return;
+    colourPanelOpen = false;
+    sideNavColourToggle.setAttribute("aria-expanded", "false");
+    sideNavColourPanel.hidden = true;
+    if (focusToggle) {
+      requestAnimationFrame(() => {
+        sideNavColourToggle.focus({ preventScroll: true });
+      });
     }
   }
 
-  function toggleDrawMenu() {
-    if (drawMenuOpen) closeDrawMenu({ focusTrigger: false });
-    else openDrawMenu();
+  function toggleSideNavColourPanel() {
+    if (colourPanelOpen) closeSideNavColourPanel();
+    else openSideNavColourPanel();
   }
 
+  function triggerThemeTransition() {
+    if (reduceMotion) return;
+    document.documentElement.classList.add("theme-transition");
+    clearTimeout(themeTransitionTimer);
+    themeTransitionTimer = setTimeout(() => {
+      document.documentElement.classList.remove("theme-transition");
+    }, 420);
+  }
+
+  sideNavColourToggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    toggleSideNavColourPanel();
+  });
+
+  sideNavColourButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.colour;
+      if (!key || key === drawColourKey) {
+        closeSideNavColourPanel({ focusToggle: true });
+        return;
+      }
+      applyDrawColour(key);
+      closeSideNavColourPanel({ focusToggle: true });
+    });
+  });
+
   function handleGlobalPointerDown(event) {
-    if (!drawMenuOpen) return;
-    if (!drawControl?.contains(event.target)) {
-      closeDrawMenu();
+    if (
+      colourPanelOpen &&
+      sideNavColourControl &&
+      !sideNavColourControl.contains(event.target)
+    ) {
+      closeSideNavColourPanel();
     }
   }
 
   function handleGlobalKeydown(event) {
-    if (event.key === "Escape" && drawMenuOpen) {
-      closeDrawMenu({ focusTrigger: true });
+    if (event.key === "Escape") {
+      if (colourPanelOpen) {
+        closeSideNavColourPanel({ focusToggle: true });
+      }
     }
   }
 
@@ -1270,26 +1544,39 @@ document.addEventListener("DOMContentLoaded", () => {
     updateTimelineFill();
     debouncedAlignContent();
   }, 150);
-
-  // Theme
-  function applyTheme(theme) {
-    document.documentElement.classList.toggle("light", theme === "light");
-    if (themeToggleCheckbox) {
-      themeToggleCheckbox.checked = theme === "light";
-    }
-  }
-
-  themeToggleCheckbox?.addEventListener("change", () => {
-    const newTheme = themeToggleCheckbox.checked ? "light" : "dark";
-    try {
-      localStorage.setItem("theme", newTheme);
-    } catch {}
-    applyTheme(newTheme);
+  
+  const handleResize = debounce(() => {
     gridUnit = readGridUnit();
     createGrid();
     alignContentToGrid();
-  });
+    
+    // If terminal is docked, ensure it stays aligned
+    if (isDocked) {
+      requestAnimationFrame(() => {
+        alignContentToGrid();
+        syncHeaderAlignment();
+      });
+    }
+  }, 150);
 
+  // Theme
+  function applyTheme(theme) {
+    const isLight = theme === "light";
+    const wasLight = document.documentElement.classList.contains("light");
+    if (themeInitialized && isLight !== wasLight) {
+      triggerThemeTransition();
+    }
+    document.documentElement.classList.toggle("light", isLight);
+    themeInitialized = true;
+        if (sideNavThemeToggle) {
+      sideNavThemeToggle.setAttribute("aria-pressed", String(isLight));
+      sideNavThemeToggle.textContent = isLight
+        ? "Switch to night mode"
+        : "Switch to day mode";
+    }
+  }
+
+  
   // Modal (focus trap + ESC)
   const FOCUSABLE =
     'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])';
@@ -1560,6 +1847,9 @@ document.addEventListener("DOMContentLoaded", () => {
       setDrawTrailEnabled(true, { save: false });
     }
 
+    setDrawEnabled(drawEnabled, { save: false });
+    setDrawTrailEnabled(drawTrailEnabled, { save: false });
+
     if (isTouchDevice) {
       skipNote.textContent = "Tap to skip";
       document.addEventListener("touchstart", handleSkipKey, {
@@ -1591,6 +1881,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(updateClock, 1000);
     updateClock();
     createGrid();
+    alignContentToGrid();
     document.addEventListener("mousemove", handlePixelTrail);
     document.addEventListener("pointerdown", handleGridPointerDown);
     window.addEventListener("pointermove", handleGridPointerMove, {
@@ -1599,10 +1890,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("pointerup", resetDrawingState);
     window.addEventListener("pointercancel", resetDrawingState);
     window.addEventListener("blur", resetDrawingState);
-    const debouncedCreateGrid = debounce(createGrid, 100);
-    window.addEventListener("resize", debouncedCreateGrid);
+    window.addEventListener("resize", handleResize);
     window.addEventListener("resize", debouncedTimelineMetrics);
-    window.addEventListener("resize", debouncedAlignContent);
 
     // Contact buttons: scroll to footer instead of toggling contact box
     const footer = document.getElementById("footer-section");
@@ -1624,30 +1913,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setupCollapsible("done-heading");
     setupCollapsible("experience-heading");
     setupCollapsible("timeline-heading");
+    setupCollapsible("projects-heading");
     setupCollapsible("library-heading");
     setupLibraryTabs();
     positionTimelineMarkers();
     updatePassed();
     alignContentToGrid();
 
-    if (drawTrigger) {
-      drawTrigger.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggleDrawMenu();
-      });
-    }
-
-    if (drawModeToggle) {
-      drawModeToggle.addEventListener("click", () => {
-        setDrawEnabled(!drawEnabled);
-      });
-    }
-    if (drawTrailToggle) {
-      drawTrailToggle.addEventListener("click", () => {
-        setDrawTrailEnabled(!drawTrailEnabled);
-      });
-    }
-
+    
     drawColourButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const key = btn.dataset.colour;
@@ -1656,13 +1929,30 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    sideNavThemeToggle?.addEventListener("click", () => {
+      const isLight = document.documentElement.classList.contains("light");
+      const newTheme = isLight ? "dark" : "light";
+      try {
+        localStorage.setItem("theme", newTheme);
+      } catch {}
+      applyTheme(newTheme);
+    });
+
+    sideNavDrawEnable?.addEventListener("click", () => {
+      setDrawEnabled(!drawEnabled);
+    });
+
+    sideNavDrawTrail?.addEventListener("click", () => {
+      setDrawTrailEnabled(!drawTrailEnabled);
+    });
+
     document.addEventListener("pointerdown", handleGlobalPointerDown);
     document.addEventListener("keydown", handleGlobalKeydown);
   }
 
   initialize();
 
-  if (drawControl && terminalBox.classList.contains("docked")) {
+  if (terminalBox?.classList.contains("docked")) {
     document.body.classList.add("draw-ready");
   }
 
@@ -1674,8 +1964,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!sideNav) return;
     const sideNavHandle = document.getElementById("side-nav-handle");
     const sideNavLinks = Array.from(
-      document.querySelectorAll("#side-nav .side-nav-item")
+      document.querySelectorAll("#side-nav-links .side-nav-item")
     );
+    const settingsToggle = sideNavSettingsToggle;
+    const settingsPanel = sideNavSettingsPanel;
+    let settingsOpen = false;
+
+    const hideLinks = () => {
+      if (!sideNavLinksWrapper) return;
+      sideNavLinksWrapper.hidden = true;
+    };
+
+    const showLinks = () => {
+      if (!sideNavLinksWrapper) return;
+      sideNavLinksWrapper.hidden = false;
+    };
 
     function showSideNav() {
       sideNav.classList.add("is-ready");
@@ -1705,6 +2008,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sideNavHandle.setAttribute("aria-expanded", "true");
     }
     function collapse() {
+      closeSettings();
       sideNav.classList.remove("expanded");
       sideNavHandle.setAttribute("aria-expanded", "false");
     }
@@ -1714,6 +2018,45 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isExpanded) collapse();
       else expand();
     });
+
+    function openSettings({ focusFirst = false } = {}) {
+      if (!settingsToggle || !settingsPanel || settingsOpen) return;
+      closeSideNavColourPanel();
+      settingsOpen = true;
+      if (!sideNav.classList.contains("expanded")) {
+        expand();
+      }
+      sideNav.classList.add("settings-open");
+      settingsToggle.setAttribute("aria-expanded", "true");
+      settingsToggle.setAttribute("aria-label", "Close settings");
+      settingsPanel.hidden = false;
+      hideLinks();
+      if (focusFirst) {
+        requestAnimationFrame(() => {
+          sideNavThemeToggle?.focus({ preventScroll: true });
+        });
+      }
+    }
+
+    function closeSettings() {
+      if (!settingsOpen) return;
+      settingsOpen = false;
+      sideNav.classList.remove("settings-open");
+      settingsToggle?.setAttribute("aria-expanded", "false");
+      settingsToggle?.setAttribute("aria-label", "Open settings");
+      closeSideNavColourPanel();
+      if (settingsPanel) settingsPanel.hidden = true;
+      showLinks();
+    }
+
+    if (settingsToggle) {
+      settingsToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (settingsOpen) closeSettings();
+        else openSettings({ focusFirst: true });
+      });
+    }
 
     // Auto-collapse 0.5s after pointer leaves; cancel when re-entered
     let collapseTimer = null;
@@ -1747,6 +2090,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && settingsOpen) {
+        closeSettings();
+        settingsToggle?.focus({ preventScroll: true });
+      }
+    });
+
     const prefersReducedMotion = reduceMotion;
     sideNavLinks.forEach((a) => {
       a.addEventListener("click", (e) => {
@@ -1754,6 +2104,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const sel = a.getAttribute("href");
         const target = document.querySelector(sel);
         if (!target) return;
+        
+        // Check if target section has a collapsible heading
+        const collapsibleHeading = target.querySelector('[id$="-heading"]');
+        if (collapsibleHeading) {
+          const contentWrapper = collapsibleHeading.nextElementSibling;
+          const isCollapsed = !contentWrapper.classList.contains("open");
+          
+          // If collapsed, expand it before scrolling
+          if (isCollapsed) {
+            collapsibleHeading.click(); // Trigger the existing toggle logic
+          }
+        }
+        
         try {
           target.scrollIntoView({
             behavior: prefersReducedMotion ? "auto" : "smooth",

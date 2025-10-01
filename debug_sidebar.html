@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { background: #111; color: #fff; font-family: monospace; padding: 20px; }
+.test { margin: 10px 0; padding: 10px; background: #222; }
+.ok { border-left: 4px solid #0f0; }
+.error { border-left: 4px solid #f00; }
+</style>
+</head>
+<body>
+<h1>Sidebar Debug Test</h1>
+<div id="results"></div>
+<script>
+const results = document.getElementById('results');
+function test(name, condition) {
+  const div = document.createElement('div');
+  div.className = 'test ' + (condition ? 'ok' : 'error');
+  div.textContent = name + ': ' + (condition ? 'PASS' : 'FAIL');
+  results.appendChild(div);
+}
+
+// Load the actual page
+const iframe = document.createElement('iframe');
+iframe.src = 'index.html';
+iframe.style.display = 'none';
+document.body.appendChild(iframe);
+
+iframe.onload = () => {
+  const doc = iframe.contentDocument;
+  const win = iframe.contentWindow;
+  
+  setTimeout(() => {
+    test('Side nav element exists', !!doc.getElementById('side-nav'));
+    test('Settings toggle exists', !!doc.getElementById('side-nav-settings-toggle'));
+    test('Settings panel exists', !!doc.getElementById('side-nav-settings-panel'));
+    test('Theme toggle exists', !!doc.getElementById('side-nav-theme-toggle'));
+    test('Draw enable exists', !!doc.getElementById('side-nav-draw-enable'));
+    test('Draw trail exists', !!doc.getElementById('side-nav-draw-trail'));
+    
+    const sideNav = doc.getElementById('side-nav');
+    const settingsBtn = doc.getElementById('side-nav-settings-toggle');
+    
+    if (sideNav) {
+      test('Side nav has is-ready class', sideNav.classList.contains('is-ready'));
+      const style = win.getComputedStyle(sideNav);
+      test('Side nav is visible (opacity > 0)', parseFloat(style.opacity) > 0);
+    }
+    
+    if (settingsBtn) {
+      const style = win.getComputedStyle(settingsBtn);
+      test('Settings button opacity', 'opacity: ' + style.opacity);
+      test('Settings button max-height', 'max-height: ' + style.maxHeight);
+      test('Settings button pointer-events', 'pointer-events: ' + style.pointerEvents);
+    }
+  }, 2000);
+};
+</script>
+</body>
+</html>

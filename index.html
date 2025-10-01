@@ -54,101 +54,7 @@
       >Skip to content</a
     >
 
-    <!-- Theme + draw controls -->
-    <div class="utility-controls" id="utility-controls">
-      <div class="theme-switch-wrapper">
-        <label
-          class="theme-switch"
-          for="theme-checkbox"
-          aria-label="Toggle theme"
-        >
-          <input type="checkbox" id="theme-checkbox" />
-          <div class="slider round"></div>
-        </label>
-      </div>
-
-      <div class="draw-control" id="draw-control">
-        <button
-          id="draw-trigger"
-          class="draw-trigger"
-          type="button"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="draw-menu"
-          aria-pressed="false"
-        >
-          <span class="draw-trigger-icon" aria-hidden="true">
-            <span class="draw-icon draw-icon--square"></span>
-            <span class="draw-icon draw-icon--circle"></span>
-            <span class="draw-icon draw-icon--triangle"></span>
-          </span>
-          <span class="draw-trigger-label">Draw</span>
-          <svg
-            class="draw-trigger-caret"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            aria-hidden="true"
-          >
-            <path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <div class="draw-menu" id="draw-menu" role="menu" aria-hidden="true">
-          <div class="draw-menu-section">
-            <button
-              id="draw-mode-toggle"
-              class="draw-menu-toggle"
-              type="button"
-              role="menuitemcheckbox"
-              aria-checked="false"
-            >
-              <span class="draw-menu-toggle-indicator" aria-hidden="true"></span>
-              Enable drawing
-            </button>
-            <button
-              id="draw-trail-toggle"
-              class="draw-menu-toggle"
-              type="button"
-              role="menuitemcheckbox"
-              aria-checked="true"
-            >
-              <span class="draw-menu-toggle-indicator" aria-hidden="true"></span>
-              Trail effect
-            </button>
-          </div>
-          <div class="draw-menu-section" role="radiogroup" aria-label="Draw colour">
-            <p class="draw-menu-heading">Colour</p>
-            <ul class="draw-menu-options">
-              <li>
-                <button class="draw-colour" type="button" role="menuitemradio" data-colour="amber" aria-checked="false">
-                  <span class="draw-colour-swatch" style="--colour:#fbbf24"></span>
-                  Amber
-                </button>
-              </li>
-              <li>
-                <button class="draw-colour" type="button" role="menuitemradio" data-colour="sky" aria-checked="false">
-                  <span class="draw-colour-swatch" style="--colour:#38bdf8"></span>
-                  Sky
-                </button>
-              </li>
-              <li>
-                <button class="draw-colour" type="button" role="menuitemradio" data-colour="violet" aria-checked="false">
-                  <span class="draw-colour-swatch" style="--colour:#a855f7"></span>
-                  Violet
-                </button>
-              </li>
-              <li>
-                <button class="draw-colour" type="button" role="menuitemradio" data-colour="lime" aria-checked="false">
-                  <span class="draw-colour-swatch" style="--colour:#a3e635"></span>
-                  Lime
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  
     <!-- Background grid -->
     <div id="background-grid"></div>
 
@@ -690,11 +596,35 @@
 
           <!-- Projects -->
           <section id="projects-section" class="mb-16">
-            <h2 class="text-2xl font-semibold text-gray-100 mb-6">Projects</h2>
             <div
-              id="projects-container"
-              class="grid grid-cols-1 md:grid-cols-2 gap-4"
+              id="projects-heading"
+              class="collapsible-heading collapsed"
+              aria-expanded="false"
             >
+              <h2 class="text-2xl font-semibold text-gray-100">Projects</h2>
+              <span class="collapsible-toggle-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="collapsible-content-wrapper">
+              <div class="collapsible-inner-content">
+                <div
+                  id="projects-container"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6"
+                >
               <div
                 class="project-box bg-gray-800 p-6 rounded-lg border border-gray-700"
               >
@@ -735,6 +665,8 @@
                 <a href="#" class="text-sm text-amber-400 mt-4 inline-block"
                   >Coming Soon</a
                 >
+              </div>
+                </div>
               </div>
             </div>
           </section>
@@ -1176,64 +1108,179 @@
         >
           <span class="bars"></span>
         </button>
-        <ul id="side-nav-list" class="side-nav-list">
-          <li>
-            <a class="side-nav-item" href="#main" aria-label="About">
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">About</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="side-nav-item"
-              href="#experience-section"
-              aria-label="Experience"
+        <div id="side-nav-links" class="side-nav-links">
+          <ul id="side-nav-list" class="side-nav-list">
+            <li>
+              <a class="side-nav-item" href="#main" aria-label="About">
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">About</span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="side-nav-item"
+                href="#experience-section"
+                aria-label="Experience"
+              >
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">Experience</span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="side-nav-item"
+                href="#timeline-section"
+                aria-label="Timeline"
+              >
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">Timeline</span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="side-nav-item"
+                href="#projects-section"
+                aria-label="Projects"
+              >
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">Projects</span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="side-nav-item"
+                href="#library-section"
+                aria-label="Library"
+              >
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">Library</span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="side-nav-item"
+                href="#footer-section"
+                aria-label="Contact"
+              >
+                <span class="side-nav-dot" aria-hidden="true"></span>
+                <span class="side-nav-label">Contact</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <button
+          id="side-nav-settings-toggle"
+          class="side-nav-item side-nav-settings-trigger"
+          type="button"
+          aria-expanded="false"
+          aria-controls="side-nav-settings-panel"
+          aria-label="Open settings"
+        >
+          <span class="side-nav-dot" aria-hidden="true"></span>
+          <span class="side-nav-label">Settings</span>
+        </button>
+        <div
+          id="side-nav-settings-panel"
+          class="side-nav-settings-panel"
+          hidden
+        >
+          <div class="side-nav-settings-group">
+            <p class="side-nav-settings-heading">Theme</p>
+            <button
+              id="side-nav-theme-toggle"
+              class="side-nav-settings-toggle"
+              type="button"
+              aria-pressed="false"
             >
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">Experience</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="side-nav-item"
-              href="#timeline-section"
-              aria-label="Timeline"
+              Toggle theme
+            </button>
+          </div>
+          <div class="side-nav-settings-group">
+            <p class="side-nav-settings-heading">Drawing</p>
+            <button
+              id="side-nav-draw-enable"
+              class="side-nav-settings-toggle"
+              type="button"
+              aria-pressed="false"
             >
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">Timeline</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="side-nav-item"
-              href="#projects-section"
-              aria-label="Projects"
+              Enable drawing
+            </button>
+            <button
+              id="side-nav-draw-trail"
+              class="side-nav-settings-toggle"
+              type="button"
+              aria-pressed="false"
             >
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">Projects</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="side-nav-item"
-              href="#library-section"
-              aria-label="Library"
-            >
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">Library</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="side-nav-item"
-              href="#footer-section"
-              aria-label="Contact"
-            >
-              <span class="side-nav-dot" aria-hidden="true"></span>
-              <span class="side-nav-label">Contact</span>
-            </a>
-          </li>
-        </ul>
+              Trail effect
+            </button>
+            <div class="side-nav-colour-control">
+              <button
+                id="side-nav-colour-toggle"
+                class="side-nav-settings-toggle side-nav-colour-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="side-nav-colour-list"
+              >
+                <span
+                  class="side-nav-colour-swatch"
+                  data-colour="amber"
+                  aria-hidden="true"
+                ></span>
+                <span class="side-nav-colour-label">Drawing colour: Amber</span>
+                <svg
+                  class="side-nav-colour-caret"
+                  viewBox="0 0 12 12"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 4.5 6 7.5 9 4.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div
+                id="side-nav-colour-list"
+                class="side-nav-colour-options"
+                role="radiogroup"
+                aria-label="Draw colour"
+                hidden
+              >
+                <button type="button" class="side-nav-colour" data-colour="amber" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="amber"></span>
+                  Amber
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="sky" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="sky"></span>
+                  Sky
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="violet" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="violet"></span>
+                  Violet
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="lime" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="lime"></span>
+                  Lime
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="emerald" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="emerald"></span>
+                  Emerald
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="rose" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="rose"></span>
+                  Rose
+                </button>
+                <button type="button" class="side-nav-colour" data-colour="cyan" role="radio" aria-checked="false">
+                  <span class="side-nav-colour-swatch" data-colour="cyan"></span>
+                  Cyan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </nav>
 
