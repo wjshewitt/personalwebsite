@@ -1,0 +1,11 @@
+:root {
+  --color-bg: #f8f6ef;
+  --color-blue: #2457ff;
+  --color-text: #171b1f;
+
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-accent: var(--color-blue);
+
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+}
