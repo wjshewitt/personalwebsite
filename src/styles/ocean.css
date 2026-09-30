@@ -265,12 +265,11 @@
 
 .identity-terminal-cursor {
   position: relative;
-  z-index: 0;
   display: inline-block;
   background: transparent;
-  color: #f1eee5;
-  isolation: isolate;
-  -webkit-text-fill-color: #f1eee5;
+  /* Keep the wrapped letter in the name's shared text gradient. */
+  color: inherit;
+  -webkit-text-fill-color: inherit;
 }
 
 .identity-terminal-cursor::before {
